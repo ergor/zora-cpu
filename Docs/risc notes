@@ -1,0 +1,26 @@
+**16.02.17**
+- 8bit databus, 16bit addrbus
+- 16 regs total for programmer:
+- in opcode: 8bit to select regs: 4bit source select + 4bit source2 which is also the destination
+- load/store RISC. No need to support ALU ops directly on memory blocks. Need only good load/store opcodes. Rest is done inter register
+- presettable up/down counters for SP and PC. SP is initialized in software anyways
+- special opcodes to inc/dec the counters directly without worrying about carry in ALU?
+- A constant 0 is accessed as register 0. The assembler uses register 0 as a placeholder to make any of several human-readable instructions into one machine instruction, e.g., move rx to ry becomes add r0 to rx and store in ry
+
+**02.02.17**
+- Connect 2 temp regs to each ALU input. ALU output is on the databus, where also the register bank has its inputs
+- the temp regs share common input: separate IEs
+- the common input is tied to the output of register bank
+- no need for immediate value ALU ops: incrementing and dec the PC/SP is done by the counters directly. Any immediate value can just be loaded to a register, and then use that register to do the ALU function. (Load/store arch)
+
+i.e.
+
+Load r0, #1 ; load the value 1 to r0
+Add r0, r1 ; add r0 (1) to r1, result in r1
+
+Instead of
+
+Inc r1
+
+**Aug 25**
+Multiphase clock (shiftreg?ringcounter?) to clock through data sequentially, using micro code merely to decode source/destination registers encoded in the instruction. 
