@@ -1,0 +1,26 @@
+**ALU operations syntax**
+OP SRC1, SRC2, DEST
+
+- SRC1: accumulator
+- SRC2: accumulator, immediate value or memory location
+- DEST: accumulator or same memory location as SRC2 if SRC2 is a memory location, or memory location if A and B are added
+
+SYNTAX:
+ADD A, B, x		; add A and B, store in A or B
+
+example:
+ADD A, B, A		; adds contents of A and of B to A
+ADD A, B, B		; adds contents of A and of B to B
+ADD A, B, (10)		; adds contents of A and of B to memory location 10
+
+ADD A, (10), A		; adds contents of A and of memory location 10 to A
+ADD A, (10), B		; adds contents of A and of memory location 10 to B
+ADD A, (10), M		; adds contents of A and of memory location 10 to to memory location 10
+
+ADD B, (10), B		; adds contents of B and of memory location 10 to B
+ADD B, (10), A		; adds contents of B and of memory location 10 to A
+ADD B, (10), M		; adds contents of B and of memory location 10 to to memory location 10
+
+
+
+CALL 1234h
