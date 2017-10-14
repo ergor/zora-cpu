@@ -1,1 +1,7 @@
 *.*#
+/tools/microassembler/nbproject/private/
+/tools/microassembler/build/
+/tools/microassembler/nbbuild/
+/tools/microassembler/dist/
+/tools/microassembler/nbdist/
+/tools/microassembler/.nb-gradle/

@@ -1,0 +1,50 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "microasm",
+	"patterns": [
+		{
+			"include": "#keywords"
+		},
+		{
+			"include": "#strings"
+		},
+		{
+			"include": "#tstates"
+		},
+		{
+			"include": "#comments"
+		}
+	],
+	"repository": {
+		"keywords": {
+			"patterns": [{
+				"name": "keyword.control.microasm",
+				"match": "\\b(lines|clocks|define|instructions|meta)\\b"
+			}]
+		},
+		"tstates": {
+			"patterns": [{
+				"name": "string.quoted.microasm",
+				"match": "\\b(T0|T1|T2|T3|T4|T5|T6|T7)\\b"
+			}]
+		},
+		"comments": {
+			"name": "comment.microasm",
+			"begin": "//",
+			"end": "\n",
+			"patterns": []
+		},
+		"strings": {
+			"name": "string.quoted.double.microasm",
+			"begin": "\"",
+			"end": "\"",
+			"patterns": [
+				{
+					"name": "constant.character.escape.microasm",
+					"match": "\\\\."
+				}
+			]
+		}
+	},
+	"scopeName": "source.masm"
+}

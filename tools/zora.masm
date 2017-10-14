@@ -1,0 +1,117 @@
+
+lines {
+    #TMP_A_OE
+    #TMP_B_OE
+    #ALU_OE
+    #PC_OE
+    #SP_OE
+    IO_M
+    WE
+    RE
+
+    #GPR_OE
+    #GPR_IE
+    SRC_SEL
+    #PC_LOAD
+    #PC_CLK_EN
+    free1
+    free2
+    #RESET
+}
+
+clocks {
+    T0 {
+        IR_REGSEL_CLK
+    }
+    T1 {
+        IR_INDEX_CLK
+    }
+    T2 {
+        TMP_A_CLK
+    }
+    T3 {
+        GPREGS_CLK
+        TMP_B_CLK
+    }
+}
+
+meta {
+    registers {
+        r0
+        r1
+        r2
+        r3
+        r4
+        r5
+        r6
+        r7
+    }
+    aluops {
+        ALUOP_ZEORES
+        ALUOP_XOR
+    }
+}
+
+define {
+    fetcht0 {
+        PC_OE
+        RE
+        IR_REGSEL_CLK
+        PC_CLK_EN
+    }
+    fetcht1 {
+        PC_OE
+        RE
+        IR_INDEX_CLK
+        PC_CLK_EN
+    }
+}
+
+instructions {
+
+    // move the value of rx to ry
+    MOV rx, ry {
+        T0 {
+            fetcht0
+        }
+        T1 {
+            fetcht1
+        }
+        T2 {
+            GPR_OE
+            TMP_A_CLK
+        }
+        T3 {
+            TMP_A_OE
+            ALU_OE
+            ALUOP_XOR
+            GPR_IE
+            GPREGS_CLK
+        }
+        T4 {
+            RESET
+        }
+    }
+
+    // move the immediate value m to register rx
+    MOV m, rx {
+        T0 {
+            fetcht0
+        }
+        T1 {
+            fetcht1
+        }
+        T2 {
+        }
+        T3 {
+            PC_OE
+            RE
+            GPR_IE
+            PC_CLK_EN
+            GPREGS_CLK
+        }
+        T4 {
+            RESET
+        }
+    }
+}

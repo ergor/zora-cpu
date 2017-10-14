@@ -1,0 +1,26 @@
+{
+    "name": "microasm",
+    "displayName": "microasm",
+    "description": "microasm",
+    "version": "0.0.1",
+    "publisher": "erol",
+    "engines": {
+        "vscode": "^1.17.0"
+    },
+    "categories": [
+        "Languages"
+    ],
+    "contributes": {
+        "languages": [{
+            "id": "microasm",
+            "aliases": ["microasm", "microasm"],
+            "extensions": [".masm"],
+            "configuration": "./language-configuration.json"
+        }],
+        "grammars": [{
+            "language": "microasm",
+            "scopeName": "source.masm",
+            "path": "./syntaxes/microasm.tmLanguage.json"
+        }]
+    }
+}
