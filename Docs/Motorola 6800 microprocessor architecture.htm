@@ -1,0 +1,174 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>Motorola 6800 microprocessor architecture</title>
+<meta name="keywords" content="">
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link rel="stylesheet" href="/cpu_world16.css" type="text/css">
+<link rel="search" type="application/opensearchdescription+xml" title="Search CPU-World.com" href="/cw_search.xml">
+<link rel="search" type="application/opensearchdescription+xml" title="Identify CPU" href="/cw_identify.xml">
+</head>
+
+<body>
+<div align='center' class='x_content'><div class='info_content'>
+<table class="nav_table">
+<tr><td colspan=2 height="3"><div style="margin-bottom: 8px"></div></td></tr>
+<tr><td width="210" rowspan="2" class='h_logo'><div><a href="/index.html">CPU-World</a></div></td>
+	<th height="20" class='h_mmenu'><a href="/cpu_news/index.html">News</a> &bull;
+		<a href="/CPUs/index.html">Chips</a> &bull;
+		<a href="/benchmarks/">Benchmarks</a> &bull;
+		<a href="/info/index.html">Information</a> &bull;
+		<a href="/forum/">Forum</a> &bull;
+		<a href="/links/index.html">Links</a> &bull;
+		<a href="/about.html">About</a></th>
+</tr>
+<tr><td height="20" class='h_smenu'><a href="/info/id/index.html">Identification</a>  &bull;
+		<a href="/info/Pinouts/index.html">Pinouts</a> &bull;
+		<a href="/sspec/index.html">S-Spec numbers</a> &bull;
+		<a href="/Glossary/index.html">Glossary</a> 
+</tr>
+</table>
+
+<div class='top_search_ad'>
+<div class='top_searchh'><div class='top_searchhi'>
+	<h4 class="side_h4">Search CPU-World</h4>
+	<FORM ACTION='/cgi-bin/SearchSite.pl' METHOD='POST'>
+	<div style='padding: 10px 0 5px 5px'>Search the site / Identify CPU / Quick CPU lookup:</div>
+	<div style='padding: 5px 0 10px 0'><input type=TEXT id='PART_S' name=SEARCH size="15" class='isearch2' onFocus='AS_Focus(this, "/cgi-bin/ajax/parts.fcgi?PART=%PART_S%&amp;ACTION=MATCHFPSAIV&amp;WANT=URL&amp;FIELD=PART_S", 500, null, "URL", null, -5, -26, 1, "1Q")' onBlur='AS_Blur(this)'><input type=SUBMIT name=PROCESS value='Go' class="ibuttonr"></div>
+	</form>
+</div></div>
+
+<div id='AB_W7' class='top_adh'><div class='top_adh2'><script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- 728 x 90 CW top ad -->
+<ins class="adsbygoogle"
+     style="display:inline-block;width:728px;height:90px"
+     data-ad-client="ca-pub-6693271402725072"
+     data-ad-slot="3796502091"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+</div></div>
+<div class='clear'><!-- --></div>
+</div>
+
+<div id='AB_B'>
+<div class='yhb'><h1>Motorola 6800 microprocessor architecture</h1></div>
+<div style='padding: 10px 0 10px 10px'><!-- SEARCH_IBEFORE -->
+<!-- SEARCH_IFROM --><div class='side160_div'>
+<h4 class='side_hs'>Related links</h4>
+<div class='side_div2'><div class='side_sect'>
+<a href="/Arch/650x.html">MOS 650x architecture</a><br><a href="/Arch/6809.html">Motorola 6809 architecture</a><br><a href="/Arch/8080.html">Intel 8080 architecture</a><br><a href="/Arch/8085.html">Intel 8085 architecture</a><br><a href="/Arch/Z80.html">Zilog Z80 architecture</a><br><a href="/Arch/index.html">All architectures</a><div class="side_ssep"><!-- --></div><a href="/CPUs/6800/index.html">6800 CPU family</a><br><a href="/Arch/6809.html">6809 architecture</a>
+</div></div>
+<div class='side_div2'><div class='side_ad160' style='padding-top: 150px'>
+<!-- 160 x 600, CW side ad -->
+<ins class="adsbygoogle"
+     style="display:inline-block;width:160px;height:600px"
+     data-ad-client="ca-pub-6693271402725072"
+     data-ad-slot="9818181501"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+</div>
+</div>
+</div><!-- SEARCH_ITO -->
+<div class='main160_div'><div class='main_div2'>
+<h2><span><!-- --></span> Memory</h2><p>Program, data and stack memories occupy the same memory space.
+The total addressable memory size is 64 KB.
+<p><b>Program memory</b> - program can be located anywhere in memory.
+Jump and subroutine call instructions can be used to jump anywhere in
+memory. Conditional and unconditional branches are limited to memory addresses
+positioned no farther than -125 - +129 bytes from the branch instruction.
+<p><b>Data memory</b> - data can be anywhere in memory space.
+<p><b>Stack memory</b> - stack can be placed anywhere in memory space.
+<p><b>Reserved memory locations</b>:
+<ul>
+<li> FFF8h - FFF9h: Pointer to IRQ interrupt-processing routine.</li>
+<li> FFFAh - FFFBh: Pointer to software interrupt-processing routine.</li>
+<li> FFFCh - FFFDh: Pointer to NMI interrupt-processing routine.</li>
+<li> FFFEh - FFFFh: Pointer to RESET handling code.</li>
+<li> Some memory addresses may be reserved for memory mapped I/O as the processor
+doesn't have hardware I/O capability.</li>
+</ul><h2><span><!-- --></span> Interrupts</h2><p><b>IRQ</b> - maskable interrupt. When the interrupt occurs the program counter,
+index register, accumulators and condition code registers are stored in the stack,
+the further interrupts are disabled and the processor jumps to memory location
+address of which is stored in memory FFF8h - FFF9h.
+To return from the interrupt the processing routine should use RTI instruction.
+This interrupt can be enabled/disabled using CLI/SEI instructions.
+<p><b>NMI</b> - non-maskable interrupt. When the interrupt occurs the program counter,
+index register, accumulators and condition code registers are stored
+in the stack, the further interrupts are disabled
+and the processor jumps to memory location address of which is stored in memory FFFCh - FFFDh.
+To return from the interrupt the processing routine should use RTI instruction.
+This interrupt can not be disabled.
+<p><b>SWI</b> - software interrupt. This interrupt can be only invoked from the program.
+When the interrupt occurs the processor stores the program counter,
+index register, accumulators and condition code registers in the stack,
+disables the further interrupts and jumps to memory location address of
+which is stored in memory FFFAh - FFFBh.
+To return from the interrupt the processing routine should use RTI instruction.
+This interrupt can not be disabled.<h2><span><!-- --></span> I/O ports</h2><p>None.<h2><span><!-- --></span> Registers</h2><p><b>Accumulator A</b> (ACCA) is an 8-bit register used for arithmetic and logic operations.
+<p><b>Accumulator B</b> (ACCB) is an 8-bit register used for arithmetic and logic operations.
+<p><b>Index</b> (IX) is a 16-bit register usually used for temporary storage or as an index when indexed addressing is used.
+<p><b>Program counter</b> (PC) is a 16-bit register.
+<p><b>Stack pointer</b> (SP) is a 16-bit register.
+<p><b>Condition code</b> register contains the following flags:
+<ul>
+<li> Half carry (H) - set if there was a carry from bit 3 to bit 4 of the result
+when the result was calculated.</li>
+<li> Interrupt mask (I) - set if the IRQ interrupt is disabled.</li>
+<li> Negative (N) - set if the most significant bit of the result is set.</li>
+<li> Zero (Z) - set if the result is zero.</li>
+<li> Overflow (V) - set if there was an overflow during last result calculation.</li>
+<li> Carry (C) - set if there was a carry from the bit 7 during last result calculation.</li>
+</ul><h2><span><!-- --></span> Instruction Set</h2><p>6800 instruction set consists of 72 instructions:
+<ul>
+<li> Data moving instructions.</li>
+<li> Arithmetic - add, subtract, negate, increment, decrement and compare.</li>
+<li> Logic - AND, OR, exclusive OR, complement and shift/rotate.</li>
+<li> Control transfer - conditional, unconditional, call subroutine and
+return from subroutine.</li>
+<li> Other - clear/set condition flags, bit test, stack operations, software interrupt, etc.</li>
+</ul><h2><span><!-- --></span> Addressing modes</h2><p><b>Implied</b> - the data value/data address is implicitly associated with the instruction.
+<p><b>Accumulator</b> - the instruction implies that the data is one of the accumulator registers.
+<p><b>Immediate</b> - 8-bit or 16-bit data is provided in the instruction.
+<p><b>Direct</b> - one-byte operand provided in the instruction specifies
+the memory address in page zero (0000h - 00FFh) where data is located.
+<p><b>Extended</b> - two-byte operand provided in the instruction specifies
+the memory address where data is located.
+<p><b>Relative</b> - one byte offset is added to the address of the next instruction
+(the contents of the program counter register + 2).
+The offset is a signed number in the range -127 - +127.
+<p><b>Indexed</b> - one byte operand is added to the contents of the IX register, the
+resulting 16-bit value is a pointer to memory where data is located.
+</div></div><div class='clear'><!-- --></div>
+<div class='main2_div'>
+<h6>Comments</h6>
+<div class='comments_sep'><!-- --></div>
+<p>
+
+<!-- [START_COMMENTS] -->
+<a name='comments'></a>
+<div class="comments">
+
+<div class='comment_buttons'><form action='/cgi-bin/AddComment.pl'><input type='hidden' name='PAGE_ID' value='692634'><input type='submit' name='PROCESS' value='Post comment / picture' class='ibutton'></form></div>
+</div>
+<!-- [END_COMMENTS] -->
+
+<!-- SEARCH_IREST -->
+<div class='yhb_ifooter'>Last modified: 6 May 2016</div>
+
+</div>
+<!-- SEARCH_IREST -->
+</div>
+
+<table class='ft_table'>
+  <tr><td><a href="/terms_and_conditions.html">Terms and Conditions</a> &middot; <a href="/privacy_policy.html">Privacy Policy</a> &middot; <a href="/contact_us.html">Contact Us</a></td>
+	<td align="right">(c) Copyright 2003 - 2016 Gennadiy Shvets</td>
+  <tr><th colspan=2 height="8"><div style="margin-bottom: 3px"></div></th></tr>
+</table>
+</div>
+</div></div>
+
+<script type="text/javascript" src="/cpu_world16.js"></script></body>
+</html>

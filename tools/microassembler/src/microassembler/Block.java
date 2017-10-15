@@ -68,7 +68,7 @@ public class Block {
             
             // skip any whitespace-only line
             trimmed = line.trim();
-            if (trimmed.equals(""))
+            if (trimmed.equals("") || trimmed.startsWith("//"))
                 continue;
             
             for (char c : trimmed.toCharArray()) {

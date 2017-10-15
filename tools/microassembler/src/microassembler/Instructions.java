@@ -1,6 +1,8 @@
 package microassembler;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.TreeSet;
 
 /**
  *
@@ -20,13 +22,22 @@ public class Instructions {
         
         for (Block instruction : instructions) {
             
+            System.out.println(String.format("0x%02X %s", (byte)opcode, 
+                instruction.getSymbol()));
+            
             T = 0;
             List<Block> T_states = Block.split(instruction.getBody());
             
             for (Block T_state : T_states) {
+
+                while(Defines.apply(T_state));
                 
-                Defines.apply(T_state);
+                // check if there are duplicate line usages
+                TreeSet hs = new TreeSet(T_state.getBody());
+                if (hs.size() != T_state.getBody().size())
+                    System.out.println("\twarning: duplicate line usage");
                 
+                // initialize byte values pr chip
                 int[] value = new int[Microassembler.CHIP_COUNT];
                 for (int chip = 0; chip < Microassembler.CHIP_COUNT; chip++) {
                     value[chip] = ControlLines.getInactiveValue(chip);
@@ -34,14 +45,15 @@ public class Instructions {
                 
                 for (String line : T_state.getBody()) {
                     
-                    // skip value generation if this is a HW clock line
-                    if (Clocks.isCorrectlyTimed(T_state.getSymbol(), line))
+                    // skip comment lines
+                    if (line.startsWith("//"))
                         continue;
                     
                     ControlLine cl = ControlLines.get(line);
                     
+                    // check for undefined lines
                     if (cl == null) {
-                        System.out.println("warning: control line null!");
+                        System.out.println("\twarning: control line null: "+line);
                         continue;
                     }
                     

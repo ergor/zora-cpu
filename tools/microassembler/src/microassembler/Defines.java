@@ -26,7 +26,7 @@ public class Defines {
         return dict.get(symbol);
     }
     
-    public static void apply(Block T_state) {
+    public static boolean apply(Block T_state) {
         
         List<String> body = T_state.getBody();
         List<String> definesPresent = new ArrayList<>();
@@ -39,5 +39,7 @@ public class Defines {
         
         for (String define : definesPresent)
             body.addAll(resolveDef(define));
+        
+        return definesPresent.size() > 0;
     }
 }

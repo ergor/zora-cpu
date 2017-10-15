@@ -9,30 +9,23 @@ lines {
     WE
     RE
 
-    #GPR_OE
     #GPR_IE
     SRC_SEL
-    #PC_LOAD
-    #PC_CLK_EN
-    free1
-    free2
+    #PC_LOAD_EN
+    PC_CNT_EN
+    Cin_EN
+    REG_CLK_0
+    REG_CLK_1
+    REG_CLK_2
+    
+    REG2_CLK_0
+    REG2_CLK_1
+    REG2_CLK_2
     #RESET
-}
-
-clocks {
-    T0 {
-        IR_REGSEL_CLK
-    }
-    T1 {
-        IR_INDEX_CLK
-    }
-    T2 {
-        TMP_A_CLK
-    }
-    T3 {
-        GPREGS_CLK
-        TMP_B_CLK
-    }
+    #BRANCH_EN
+    FLAG_S0
+    FLAG_S1
+    FLAG_S2
 }
 
 meta {
@@ -46,72 +39,184 @@ meta {
         r6
         r7
     }
-    aluops {
-        ALUOP_ZEORES
-        ALUOP_XOR
+
+    ALUOP_XOR {
+        B1 {
+            0b100xxxxx
+        }
     }
 }
 
 define {
-    fetcht0 {
+    FETCH_T0 {
         PC_OE
         RE
         IR_REGSEL_CLK
-        PC_CLK_EN
+        PC_CNT_EN
     }
-    fetcht1 {
+    FETCH_T1 {
         PC_OE
         RE
         IR_INDEX_CLK
-        PC_CLK_EN
+        PC_CNT_EN
+    }
+    // BEGIN: encoded lines
+    IR_REGSEL_CLK {
+        REG_CLK_0
+    }
+    IR_INDEX_CLK {
+        REG_CLK_1
+    }
+    TMP_A_CLK {
+        REG_CLK_1
+        REG_CLK_0
+    }
+    TMP_B_CLK {
+        REG_CLK_2
+    }
+    PC_H_CLK {
+        REG_CLK_2
+        REG_CLK_0
+    }
+    FLAGS_CLK {
+        REG_CLK_2
+        REG_CLK_1
+    }
+    SP_CLK_DOWN {
+        REG2_CLK_0
+    }
+    // END: encoded lines
+    PASS_A {
+        TMP_A_OE
+        ALU_OE
+        ALUOP_XOR
+    }
+    PASS_B {
+        TMP_B_OE
+        ALU_OE
+        ALUOP_XOR
+    }
+    PUSH_DB {
+        SP_OE
+        WE
+    }
+    SRC_TO_A {
+        TMP_A_CLK
+    }
+    SRC_TO_B {
+        TMP_B_CLK
+        SRC_SEL
     }
 }
 
 instructions {
 
+    // an instriction is always 2 bytes (16 bit):
+    // ADDR: 0  1  2  3  4 ..
+    // DATA: B0 B1 ..........
+    //       |---|
+    //    instruction
+    //
+    // B0: is directly tied to HW decoders to select registers
+    // b7 b6 b5 b4 b3 b2 b1 b0
+    // |---------| |---------|
+    // source 1    source 2 and destination
+    // 0b0xxx -> GP regs
+    // 0b1xxx -> special regs, ex.: PC, SP, etc..
+    //
+    // B1:
+    // b7 b6 b5 b4 b3 b2 b1 b0
+    // |------| |------------|
+    // ALU OP   micro code index
+    // ALU OP is hardwired to the ALU (Am25LS2517 op codes)
+    // micro code index is an address to the micro code ROM
+
+    NOP {
+        T0 {
+            FETCH_T0
+        }
+        T1 {
+            FETCH_T1
+        }
+        T3 {
+            RESET
+        }
+    }
+
     // move the value of rx to ry
     MOV rx, ry {
         T0 {
-            fetcht0
+            FETCH_T0
         }
         T1 {
-            fetcht1
+            FETCH_T1
         }
         T2 {
-            GPR_OE
-            TMP_A_CLK
+            SRC_TO_A
         }
         T3 {
-            TMP_A_OE
-            ALU_OE
-            ALUOP_XOR
+            PASS_A
             GPR_IE
-            GPREGS_CLK
         }
         T4 {
             RESET
         }
     }
 
-    // move the immediate value m to register rx
-    MOV m, rx {
+    // load the immediate value m to register rx
+    LD m, rx {
         T0 {
-            fetcht0
+            FETCH_T0
         }
         T1 {
-            fetcht1
+            FETCH_T1
         }
         T2 {
-        }
-        T3 {
             PC_OE
             RE
             GPR_IE
-            PC_CLK_EN
-            GPREGS_CLK
+            PC_CNT_EN
+        }
+        T3 {
+            RESET
+        }
+    }
+
+    CALL m {
+        T0 {
+            FETCH_T0
+        }
+        T1 {
+            FETCH_T1
+        }
+        T2 {
+            SRC_TO_A
+        }
+        T3 {
+            PASS_A
+            PUSH_DB
+            SRC_TO_B
         }
         T4 {
-            RESET
+            SP_CLK_DOWN
+        }
+        T5 {
+            PASS_B
+            PUSH_DB
+        }
+        T6 {
+            // put to DB from RAM
+            PC_OE
+            PC_CNT_EN
+            RE
+            // latch high address
+            PC_H_CLK
+        }
+        T7 {
+            PC_OE
+            RE
+            PC_LOAD_EN
+            SP_CLK_DOWN
         }
     }
 }

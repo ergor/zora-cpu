@@ -13,7 +13,7 @@ import java.util.List;
  */
 public class Microassembler {
     
-    public static final int CHIP_COUNT = 2;
+    public static final int CHIP_COUNT = 3;
     public static final int MEMORY_SIZE = 256;
     
     private static final int[][] memory = new int[CHIP_COUNT][MEMORY_SIZE];
@@ -30,8 +30,8 @@ public class Microassembler {
         ControlLines.initialize(blocks);
         prepareMemory();
         Defines.initialize(blocks);
-        Clocks.initialize(blocks);
         Instructions.generate(blocks, memory);
+        Save.logisimFile(memory);
         System.out.println("OK");
     }
     

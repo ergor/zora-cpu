@@ -19,7 +19,7 @@
 		"keywords": {
 			"patterns": [{
 				"name": "keyword.control.microasm",
-				"match": "\\b(lines|clocks|define|instructions|meta)\\b"
+				"match": "\\b(lines|define|instructions|meta)\\b"
 			}]
 		},
 		"tstates": {
