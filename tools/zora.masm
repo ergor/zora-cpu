@@ -10,7 +10,7 @@ lines {
     RE
 
     free4
-    free5
+    F_CLK_EN
     #PC_LOAD_EN
     PC_CNT_EN
     Cin_EN
