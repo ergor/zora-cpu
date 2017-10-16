@@ -2,56 +2,177 @@
 lines {
     #TMP_A_OE
     #TMP_B_OE
-    #ALU_OE
     #PC_OE
     #SP_OE
+    FLAGS_SEL
     IO_M
     WE
     RE
 
-    #GPR_IE
-    SRC_SEL
+    free4
+    free5
     #PC_LOAD_EN
     PC_CNT_EN
     Cin_EN
-    REG_CLK_0
-    REG_CLK_1
-    REG_CLK_2
+    ALUOP_0
+    ALUOP_1
+    ALUOP_2
     
-    REG2_CLK_0
-    REG2_CLK_1
-    REG2_CLK_2
+    // these are really active high, this is just a trick
+    // to force the default inactive state to be 0xF
+    #OE_ENCL_0
+    #OE_ENCL_1
+    #OE_ENCL_2
+    #OE_ENCL_3
+    #CLK_ENCL_0
+    #CLK_ENCL_1
+    #CLK_ENCL_2
+    #CLK_ENCL_3
+
+    free1
+    free2
+    free3
     #RESET
-    #BRANCH_EN
+    HALT
     FLAG_S0
     FLAG_S1
     FLAG_S2
 }
 
-meta {
-    registers {
-        r0
-        r1
-        r2
-        r3
-        r4
-        r5
-        r6
-        r7
-    }
-
-    ALUOP_XOR {
-        B1 {
-            0b100xxxxx
-        }
-    }
-}
-
 define {
+    // BEGIN: encoded /OE lines
+    R0_OE {
+        OE_ENCL_0
+        OE_ENCL_1
+        OE_ENCL_2
+        OE_ENCL_3
+    }
+    R1_OE {
+        OE_ENCL_1
+        OE_ENCL_2
+        OE_ENCL_3
+    }
+    R2_OE {
+        OE_ENCL_0
+        OE_ENCL_2
+        OE_ENCL_3
+    }
+    R3_OE {
+        OE_ENCL_2
+        OE_ENCL_3
+    }
+    R4_OE {
+        OE_ENCL_0
+        OE_ENCL_1
+        OE_ENCL_3
+    }
+    R5_OE {
+        OE_ENCL_1
+        OE_ENCL_3
+    }
+    R6_OE {
+        OE_ENCL_0
+        OE_ENCL_3
+    }
+    R7_OE {
+        OE_ENCL_3
+    }
+
+    FLAGS_OE {
+        OE_ENCL_0
+        OE_ENCL_1
+        OE_ENCL_2
+    }
+    PC_H_OE {
+        OE_ENCL_1
+        OE_ENCL_2
+    }
+    PC_L_OE {
+        OE_ENCL_0
+        OE_ENCL_2
+    }
+    SP_ALUB_OE {
+        OE_ENCL_2
+    }
+    ALU_OE {
+        OE_ENCL_0
+        OE_ENCL_1
+    }
+    // END: encoded /OE lines
+    // BEGIN: encoded CLK lines
+    R0_CLK_EN {
+        CLK_ENCL_0
+        CLK_ENCL_1
+        CLK_ENCL_2
+        CLK_ENCL_3
+    }
+    R1_CLK_EN {
+        CLK_ENCL_1
+        CLK_ENCL_2
+        CLK_ENCL_3
+    }
+    R2_CLK_EN {
+        CLK_ENCL_0
+        CLK_ENCL_2
+        CLK_ENCL_3
+    }
+    R3_CLK_EN {
+        CLK_ENCL_2
+        CLK_ENCL_3
+    }
+    R4_CLK_EN {
+        CLK_ENCL_0
+        CLK_ENCL_1
+        CLK_ENCL_3
+    }
+    R5_CLK_EN {
+        CLK_ENCL_1
+        CLK_ENCL_3
+    }
+    R6_CLK_EN {
+        CLK_ENCL_0
+        CLK_ENCL_3
+    }
+    R7_CLK_EN {
+        CLK_ENCL_3
+    }
+
+    SP_CLK_DOWN {
+        CLK_ENCL_0
+        CLK_ENCL_1
+        CLK_ENCL_2
+    }
+    PC_H_CLK {
+        CLK_ENCL_1
+        CLK_ENCL_2
+    }
+    SP_CLK_UP {
+        CLK_ENCL_0
+        CLK_ENCL_2
+    }
+    SP_LOAD {
+        CLK_ENCL_2
+    }
+    IR_CLK_EN {
+        CLK_ENCL_0
+        CLK_ENCL_1
+    }
+    TMP_A_CLK {
+        CLK_ENCL_1
+    }
+    TMP_B_CLK {
+        CLK_ENCL_0
+    }
+    // END: encoded CLK lines
+    // BEGIN: ALU OPs
+    ALUOP_XOR {
+        ALUOP_2
+    }
+    // END: ALU OPs
     FETCH_T0 {
         PC_OE
         RE
-        IR_REGSEL_CLK
+        IR_CLK_EN
         PC_CNT_EN
     }
     FETCH_T1 {
@@ -60,32 +181,6 @@ define {
         IR_INDEX_CLK
         PC_CNT_EN
     }
-    // BEGIN: encoded lines
-    IR_REGSEL_CLK {
-        REG_CLK_0
-    }
-    IR_INDEX_CLK {
-        REG_CLK_1
-    }
-    TMP_A_CLK {
-        REG_CLK_1
-        REG_CLK_0
-    }
-    TMP_B_CLK {
-        REG_CLK_2
-    }
-    PC_H_CLK {
-        REG_CLK_2
-        REG_CLK_0
-    }
-    FLAGS_CLK {
-        REG_CLK_2
-        REG_CLK_1
-    }
-    SP_CLK_DOWN {
-        REG2_CLK_0
-    }
-    // END: encoded lines
     PASS_A {
         TMP_A_OE
         ALU_OE
@@ -99,13 +194,6 @@ define {
     PUSH_DB {
         SP_OE
         WE
-    }
-    SRC_TO_A {
-        TMP_A_CLK
-    }
-    SRC_TO_B {
-        TMP_B_CLK
-        SRC_SEL
     }
 }
 
@@ -136,48 +224,39 @@ instructions {
             FETCH_T0
         }
         T1 {
-            FETCH_T1
-        }
-        T3 {
             RESET
         }
     }
 
-    // move the value of rx to ry
-    MOV rx, ry {
+    MOV r0, r1 {
         T0 {
             FETCH_T0
         }
         T1 {
-            FETCH_T1
+            R0_OE
+            TMP_A_CLK
         }
         T2 {
-            SRC_TO_A
+            PASS_A
+            R1_CLK_EN
         }
         T3 {
-            PASS_A
-            GPR_IE
-        }
-        T4 {
             RESET
         }
     }
 
     // load the immediate value m to register rx
-    LD m, rx {
+    LD m, r0 {
         T0 {
             FETCH_T0
         }
         T1 {
-            FETCH_T1
+            PC_OE
+            RE            
+            PC_CNT_EN
+            R0_CLK_EN
         }
         T2 {
-            PC_OE
-            RE
-            GPR_IE
-            PC_CNT_EN
-        }
-        T3 {
             RESET
         }
     }
@@ -187,21 +266,22 @@ instructions {
             FETCH_T0
         }
         T1 {
-            FETCH_T1
+            PC_H_OE
+            TMP_A_CLK
         }
         T2 {
-            SRC_TO_A
-        }
-        T3 {
             PASS_A
             PUSH_DB
-            SRC_TO_B
         }
-        T4 {
+        T3 {
             SP_CLK_DOWN
         }
+        T4 {
+            PC_L_OE
+            TMP_A_CLK
+        }
         T5 {
-            PASS_B
+            PASS_A
             PUSH_DB
         }
         T6 {
