@@ -9,8 +9,8 @@ lines {
     WE
     RE
     
-    IO_M
-    #JMP_EN
+    #IO_M
+    #COND_uJMP
     #RESET
     HALT
     Cin_EN
@@ -24,10 +24,10 @@ lines {
     #OE_ENCL_1
     #OE_ENCL_2
     #OE_ENCL_3
-    CLK_ENCL_1
-    CLK_ENCL_2
-    CLK_ENCL_4
-    CLK_ENCL_8
+    #CLK_ENCL_0
+    #CLK_ENCL_1
+    #CLK_ENCL_2
+    #CLK_ENCL_3
 
     free2
     free3
@@ -101,88 +101,101 @@ define {
     // END: encoded /OE lines
     // BEGIN: encoded CLK lines
     R0_CLK_EN {
-        // none; this register will
-        // be written to if nothing else
-        // is specified (accumulator)
+        CLK_ENCL_0
+        CLK_ENCL_1
+        CLK_ENCL_2
+        CLK_ENCL_3
     }
     R1_CLK_EN {
         CLK_ENCL_1
+        CLK_ENCL_2
+        CLK_ENCL_3
     }
     R2_CLK_EN {
+        CLK_ENCL_0
         CLK_ENCL_2
+        CLK_ENCL_3
     }
     R3_CLK_EN {
-        CLK_ENCL_1
         CLK_ENCL_2
+        CLK_ENCL_3
     }
     R4_CLK_EN {
-        CLK_ENCL_4
-    }
-    MAR_L_CLK {
+        CLK_ENCL_0
         CLK_ENCL_1
-        CLK_ENCL_4
+        CLK_ENCL_3
     }
-    MAR_H_CLK {
-        CLK_ENCL_2
-        CLK_ENCL_4
-    }
-    FLAGS_CLK {
+    R5_CLK_EN {
         CLK_ENCL_1
-        CLK_ENCL_2
-        CLK_ENCL_4
+        CLK_ENCL_3
+    }
+    R6_CLK_EN {
+        CLK_ENCL_0
+        CLK_ENCL_3
+    }
+    FLAGS_CLK_EN {
+        CLK_ENCL_3
     }
 
     SP_CLK_DOWN {
-        CLK_ENCL_8
-    }
-    PC_H_CLK {
+        CLK_ENCL_0
         CLK_ENCL_1
-        CLK_ENCL_8
-    }
-    SP_CLK_UP {        
         CLK_ENCL_2
-        CLK_ENCL_8
+    }
+    ALR_CLK {
+        CLK_ENCL_1
+        CLK_ENCL_2
+    }
+    SP_CLK_UP {
+        CLK_ENCL_0
+        CLK_ENCL_2
     }
     SP_LOAD {
-        CLK_ENCL_1
         CLK_ENCL_2
-        CLK_ENCL_8
     }
     IR_CLK_EN {
-        CLK_ENCL_4
-        CLK_ENCL_8
+        CLK_ENCL_0
+        CLK_ENCL_1
     }
     TMP_A_CLK {
         CLK_ENCL_1
-        CLK_ENCL_4
-        CLK_ENCL_8
     }
     TMP_B_CLK {
-        CLK_ENCL_2
-        CLK_ENCL_4
-        CLK_ENCL_8
-    }
-    MAR_HL_CLK {
-        CLK_ENCL_1
-        CLK_ENCL_2
-        CLK_ENCL_4
-        CLK_ENCL_8
+        CLK_ENCL_0
     }
     // END: encoded CLK lines
     // BEGIN: ALU OPs
     ALUOP_XOR {
         ALUOP_2
     }
+    ALUOP_ADD {
+        ALUOP_0
+        ALUOP_1
+    }
     // END: ALU OPs
     FETCH_T0 {
         PC_OE
-        MAR_HL_CLK
+        RE
+        IR_CLK_EN
+        PC_CNT_EN
     }
     FETCH_T1 {
         PC_CNT_EN
         IR_CLK_EN
         RE
     }
+
+    AR_OE {
+        PC_OE
+        SP_OE
+    }
+
+    PCOE_POSTINC_RE {
+        PC_OE
+        PC_CNT_EN
+        RE
+    }
+
     PASS_A {
         TMP_A_OE
         ALU_OE
@@ -193,6 +206,12 @@ define {
         ALU_OE
         ALUOP_XOR
     }
+    ADD_A_B {
+        TMP_A_OE
+        TMP_B_OE
+        ALUOP_ADD
+    }
+
     PUSH_DB {
         SP_OE
         WE
@@ -226,50 +245,68 @@ instructions {
             FETCH_T0
         }
         T1 {
-            FETCH_T1
-        }
-        T2 {
             RESET
         }
     }
 
-    MOV r0, r1 {
+    0x08 JMP.S m {
         T0 {
             FETCH_T0
         }
         T1 {
-            FETCH_T1
+            COND_uJMP
         }
         T2 {
-            R0_OE
-            TMP_A_CLK
+            PCOE_POSTINC_RE
+            ALR_CLK
         }
         T3 {
-            PASS_A
-            R1_CLK_EN
-        }
-        T4 {
-            RESET
-        }
-    }
-
-    // load the immediate value m to register rx
-    LD m, r0 {
-        T0 {
-            FETCH_T0
-        }
-        T1 {
-            FETCH_T1
-        }
-        T2 {            
-            FETCH_T0
-        }
-        T3 {
-            PC_CNT_EN
-            //R0_CLK_EN implied
+            PC_OE
             RE
+            PC_LOAD_EN
         }
         T4 {
+            RESET
+        }
+        // micro counter will jump here if
+        // branch miss occured
+        T5 {
+            PC_CNT_EN
+        }
+        T6 {
+            PC_CNT_EN
+        }
+        T7 {
+            RESET
+        }
+    }
+    JMP.Z m {
+        *
+    }
+    JMP.V m {
+        *
+    }
+    JMP.C m {
+        *
+    }
+    JMP.A m {
+        *
+    }
+
+    JMP m {
+        T0 {
+            FETCH_T0
+        }
+        T1 {
+            PCOE_POSTINC_RE
+            ALR_CLK
+        }
+        T2 {
+            PC_OE
+            RE
+            PC_LOAD_EN
+        }
+        T3 {
             RESET
         }
     }
@@ -278,33 +315,6 @@ instructions {
         T0 {
             FETCH_T0
         }
-        T1 {
-            FETCH_T1
-        }
-        T2 {
-            FETCH_T0
-        }
-        T3 {
-            // PC now points at first address byte
-            // prepare to push PC
-            PC_H_OE
-            TMP_A_CLK
-        }
-        T4 {
-            PC_L_OE
-            TMP_B_CLK
-        }
-        T5 {
-            // load sp to mar
-            SP_OE
-            MAR_HL_CLK
-        }
-        T6 {
-            PASS_A
-            WE
-            SP_CLK_DOWN
-        }
-
         T1 {
             PC_H_OE
             TMP_A_CLK
@@ -329,14 +339,147 @@ instructions {
             PC_OE
             PC_CNT_EN
             RE
-            // latch high address
-            PC_H_CLK
+            // load low address
+            ALR_CLK
         }
         T7 {
             PC_OE
             RE
             PC_LOAD_EN
             SP_CLK_DOWN
+        }
+    }
+
+    RET {
+        T0 {
+            FETCH_T0
+        }
+        T1 {
+            SP_CLK_UP
+        }
+        T2 {
+            SP_OE
+            RE
+            ALR_CLK            
+        }
+        T3 {
+            SP_CLK_UP
+        }
+        T4 {
+            SP_OE
+            RE
+            PC_LOAD_EN
+        }
+        T5 {
+            PC_CNT_EN
+        }
+        T6 {
+            PC_CNT_EN
+        }
+        T7 {
+            RESET
+        }
+    }
+
+    0x10 JMP.NS m {
+
+    }
+    JMP.NZ m {
+
+    }
+    JMP.NV m {
+        
+    }
+    JMP.NC m {
+        
+    }
+    JMP.NA m {
+        
+    }
+
+    0x15 MOV r0, r1 {
+        T0 {
+            FETCH_T0
+        }
+        T1 {
+            R0_OE
+            TMP_A_CLK
+        }
+        T2 {
+            PASS_A
+            R1_CLK_EN
+        }
+        T3 {
+            RESET
+        }
+    }
+
+    // load the immediate value m to register rx
+    0x39 LD imm, r0 {
+        T0 {
+            FETCH_T0
+        }
+        T1 {
+            PC_OE
+            RE
+            PC_CNT_EN
+            R0_CLK_EN
+        }
+        T2 {
+            RESET
+        }
+    }
+
+    0x40 ST r0, m {
+        T0 {
+            FETCH_T0
+        }
+        T1 {
+            R0_OE
+            TMP_A_CLK
+        }
+        T2 {
+            PCOE_POSTINC_RE
+            ALR_CLK
+        }
+        T3 {
+            PCOE_POSTINC_RE
+            // AHR_CLK implied (0xF is default active line)
+
+        }
+        T4 {
+            AR_OE
+            PASS_A
+            WE
+        }
+        T5 {
+            RESET
+        }
+    }
+
+    ADD r0 {
+        T0 {
+            FETCH_T0
+        }
+        T1 {
+            R0_OE
+            TMP_A_CLK
+        }
+        T2 {
+            R0_OE
+            TMP_B_CLK
+        }
+        T3 {
+            ADD_A_B
+            FLAGS_CLK_EN
+        }
+        T4 {
+            ADD_A_B
+            ALU_OE
+            R0_CLK_EN
+        }
+        T5 {
+            RESET
         }
     }
 }

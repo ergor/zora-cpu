@@ -12,9 +12,13 @@ public class Block {
     private final String WARN_ILLEGAL_SPACE = 
             "warning: illegal space \\u00a0 detected";
     
+    private int address = -1;
     private String symbol;
     private List<String> body = new ArrayList<>();
 
+    public int getAddress() {
+        return address;
+    }
     public String getSymbol() {
         return symbol;
     }
@@ -25,9 +29,15 @@ public class Block {
         
         this.symbol = symbol.trim();
     }
+    public void setAddress(int address) {
+        this.address = address;
+    }
 
     public List<String> getBody() {
         return body;
+    }
+    public void setBody(List<String> body) {
+        this.body = body;
     }
 
     public void addBodyLine(String line) {
@@ -78,7 +88,14 @@ public class Block {
                     case SYMBOL:                        
                         if (c == '{') {
                             currentState++;
-                            block.setSymbol(sb.toString().trim());
+                            String sym = sb.toString().trim();
+                            if (sym.startsWith("0x")) {
+                                String hex = sym.split(" ")[0];
+                                sym = sym.substring(hex.length() + 1,
+                                        sym.length());
+                                block.setAddress(Integer.decode(hex));
+                            }
+                            block.setSymbol(sym);
                             sb.setLength(0);
                         }
                         else 

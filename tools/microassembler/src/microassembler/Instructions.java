@@ -17,13 +17,27 @@ public class Instructions {
         Block instructionBlock = Block.get(blocks, Keywords.INSTRUCTIONS);
         List<Block> instructions = Block.split(instructionBlock.getBody());
         
+        Block previous = null;
         int opcode = 0;
         int T;
         
         for (Block instruction : instructions) {
             
+            int adr = instruction.getAddress();
+            if (adr > 0)
+                opcode = adr;
+            
             System.out.println(String.format("0x%02X %s", (byte)opcode, 
                 instruction.getSymbol()));
+            
+            // if body only consist of asterisk, then copy the
+            // body of the previous block
+            if (previous != null && instruction.getBody().size() == 1
+                    && instruction.getBody().get(0).equals("*")) {
+                instruction.setBody(previous.getBody());
+            }
+            
+            previous = instruction;
             
             T = 0;
             List<Block> T_states = Block.split(instruction.getBody());
