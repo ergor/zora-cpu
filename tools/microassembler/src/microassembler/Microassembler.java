@@ -13,7 +13,7 @@ import java.util.List;
  */
 public class Microassembler {
     
-    public static final int CHIP_COUNT = 4;
+    public static final int CHIP_COUNT = 3;
     public static final int MEMORY_SIZE = 2048;
     
     private static final int[][] memory = new int[CHIP_COUNT][MEMORY_SIZE];

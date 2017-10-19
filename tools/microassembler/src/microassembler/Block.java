@@ -15,23 +15,26 @@ public class Block {
     private int address = -1;
     private String symbol;
     private List<String> body = new ArrayList<>();
-
+    
+    //** GETTERS AND SETTERS **//
     public int getAddress() {
         return address;
     }
+    public void setAddress(int address) {
+        this.address = address;
+    }
+        
+    
     public String getSymbol() {
         return symbol;
     }
-
     public void setSymbol(String symbol) {
         if (symbol.contains("\u00a0"))
             System.out.println(WARN_ILLEGAL_SPACE + " at: " + symbol);
         
         this.symbol = symbol.trim();
     }
-    public void setAddress(int address) {
-        this.address = address;
-    }
+
 
     public List<String> getBody() {
         return body;
@@ -39,7 +42,8 @@ public class Block {
     public void setBody(List<String> body) {
         this.body = body;
     }
-
+    
+    //** MISC METHODS **//
     public void addBodyLine(String line) {
         if (line.contains("\u00a0"))
             System.out.println(WARN_ILLEGAL_SPACE + " at: " + line);
@@ -47,6 +51,15 @@ public class Block {
         this.body.add(line.trim());
     }
     
+    public boolean isBodyWildcard() {
+        return this.getBody().size() == 1 && this.getBody().get(0).equals("*");
+    }
+    
+    public boolean isSymbolWildcard() {
+        return this.symbol.equals("*");
+    }
+    
+    //** STATIC METHODS **//
     public static Block get(List<Block> blocks, String symbol) {
         
         Block block = null;

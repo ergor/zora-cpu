@@ -1,6 +1,6 @@
 package microassembler;
 
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeSet;
 
@@ -32,12 +32,9 @@ public class Instructions {
             
             // if body only consist of asterisk, then copy the
             // body of the previous block
-            if (previous != null && instruction.getBody().size() == 1
-                    && instruction.getBody().get(0).equals("*")) {
+            if (previous != null && instruction.isBodyWildcard()) {
                 instruction.setBody(previous.getBody());
             }
-            
-            previous = instruction;
             
             T = 0;
             List<Block> T_states = Block.split(instruction.getBody());
@@ -83,6 +80,7 @@ public class Instructions {
                 T++;
             }
             
+            previous = instruction;
             opcode++;
         }
     }
@@ -91,3 +89,51 @@ public class Instructions {
 class Instruction {
     
 }
+
+
+/*
+            // check for wildcard T states, and copy from previous instruction
+            // block if they exist
+            if (previous != null) {
+                
+                List<Block> copies = new ArrayList<>();
+                List<Block> prev_T_states = Block.split(previous.getBody());
+                Block last = null;
+
+                for (int i = 0; i < T_states.size(); i++) {
+
+                    if (T_states.get(i).isSymbolWildcard()) {
+
+                        Block next = null;                        
+                        
+                        if (i + 1 != T_states.size())
+                            next = T_states.get(i + 1);
+
+                        for (Block T_state : prev_T_states) {
+                            
+                            if (last != null && !T_state.getSymbol()
+                                    .equals(last.getSymbol()))
+                                continue;
+                            
+                            if (last != null && T_state.getSymbol()
+                                    .equals(last.getSymbol())) {
+                                last = null;
+                                continue;
+                            }
+                            
+                            if (next != null && T_state.getSymbol()
+                                    .equals(next.getSymbol()))
+                                break;
+                            
+                            copies.add(T_state);
+                        }
+                        
+                        last = next;
+                    }
+                    else
+                        copies.add(T_states.get(i));
+                }
+                
+                T_states = copies;
+            }
+*/
