@@ -18,141 +18,152 @@ lines {
     ALUOP_1
     ALUOP_2
     
-    // these are really active high, this is just a trick
-    // to force the default inactive state to be 0xF
-    #OE_ENCL_0
-    #OE_ENCL_1
-    #OE_ENCL_2
-    #OE_ENCL_3
-    #CLK_ENCL_0
+    // these are not directly used; they are fed into decoders. see defines
+    OE_ENCL_1
+    OE_ENCL_2
+    OE_ENCL_4
+    OE_ENCL_8
     #CLK_ENCL_1
     #CLK_ENCL_2
-    #CLK_ENCL_3
+    #CLK_ENCL_4
+    #CLK_ENCL_8
 }
 
 define {
     // BEGIN: encoded /OE lines
     R0_OE {
-        OE_ENCL_0
-        OE_ENCL_1
-        OE_ENCL_2
-        OE_ENCL_3
+        // nothing; R0 (accumulator) is default OE entity
     }
     R1_OE {
         OE_ENCL_1
-        OE_ENCL_2
-        OE_ENCL_3
     }
     R2_OE {
-        OE_ENCL_0
         OE_ENCL_2
-        OE_ENCL_3
     }
     R3_OE {
+        OE_ENCL_1
         OE_ENCL_2
-        OE_ENCL_3
     }
     R4_OE {
-        OE_ENCL_0
-        OE_ENCL_1
-        OE_ENCL_3
+        OE_ENCL_4
     }
     R5_OE {
         OE_ENCL_1
-        OE_ENCL_3
+        OE_ENCL_4
     }
     R6_OE {
-        OE_ENCL_0
-        OE_ENCL_3
+        OE_ENCL_2
+        OE_ENCL_4
     }
     FLAGS_SEL {
-        OE_ENCL_3
+        OE_ENCL_1
+        OE_ENCL_2
+        OE_ENCL_4
     }
 
     FLAGS_OE_OPBUS {
-        OE_ENCL_0
-        OE_ENCL_1
-        OE_ENCL_2
+        OE_ENCL_8
     }
     PC_H_OE {
         OE_ENCL_1
-        OE_ENCL_2
+        OE_ENCL_8
     }
     PC_L_OE {
-        OE_ENCL_0
         OE_ENCL_2
+        OE_ENCL_8
     }
     SP_ALUB_OE {
+        OE_ENCL_1
         OE_ENCL_2
+        OE_ENCL_8
     }
     ALU_OE {
-        OE_ENCL_0
+        OE_ENCL_4
+        OE_ENCL_8
+    }
+    CLI {
         OE_ENCL_1
+        OE_ENCL_4
+        OE_ENCL_8
+    }
+    SEI {
+        OE_ENCL_2
+        OE_ENCL_4
+        OE_ENCL_8
+    }
+    INTA {
+        OE_ENCL_1
+        OE_ENCL_2
+        OE_ENCL_4
+        OE_ENCL_8
     }
     // END: encoded /OE lines
     // BEGIN: encoded CLK lines
     R0_CLK_EN {
-        CLK_ENCL_0
         CLK_ENCL_1
         CLK_ENCL_2
-        CLK_ENCL_3
+        CLK_ENCL_4
+        CLK_ENCL_8
     }
     R1_CLK_EN {
-        CLK_ENCL_1
         CLK_ENCL_2
-        CLK_ENCL_3
+        CLK_ENCL_4
+        CLK_ENCL_8
     }
     R2_CLK_EN {
-        CLK_ENCL_0
-        CLK_ENCL_2
-        CLK_ENCL_3
+        CLK_ENCL_1
+        CLK_ENCL_4
+        CLK_ENCL_8
     }
     R3_CLK_EN {
-        CLK_ENCL_2
-        CLK_ENCL_3
+        CLK_ENCL_4
+        CLK_ENCL_8
     }
     R4_CLK_EN {
-        CLK_ENCL_0
         CLK_ENCL_1
-        CLK_ENCL_3
+        CLK_ENCL_2
+        CLK_ENCL_8
     }
     R5_CLK_EN {
-        CLK_ENCL_1
-        CLK_ENCL_3
+        CLK_ENCL_2
+        CLK_ENCL_8
     }
     R6_CLK_EN {
-        CLK_ENCL_0
-        CLK_ENCL_3
+        CLK_ENCL_1
+        CLK_ENCL_8
     }
     FLAGS_CLK_EN {
-        CLK_ENCL_3
+        CLK_ENCL_8
     }
 
-    SP_CLK_DOWN {
-        CLK_ENCL_0
+    SP_POSTDEC {
         CLK_ENCL_1
         CLK_ENCL_2
+        CLK_ENCL_4
     }
-    ALR_CLK {
+    AHR_CLK {
+        CLK_ENCL_2
+        CLK_ENCL_4
+    }
+    SP_POSTINC {
         CLK_ENCL_1
-        CLK_ENCL_2
-    }
-    SP_CLK_UP {
-        CLK_ENCL_0
-        CLK_ENCL_2
+        CLK_ENCL_4
     }
     SP_LOAD {
-        CLK_ENCL_2
+        CLK_ENCL_4
     }
     IR_CLK_EN {
-        CLK_ENCL_0
         CLK_ENCL_1
+        CLK_ENCL_2
     }
     TMP_A_CLK {
-        CLK_ENCL_1
+        CLK_ENCL_2
     }
     TMP_B_CLK {
-        CLK_ENCL_0
+        CLK_ENCL_1
+    }
+    ALR_CLK {
+        // nothing: default input destination
     }
     // END: encoded CLK lines
     // BEGIN: ALU OPs
@@ -169,11 +180,6 @@ define {
         RE
         IR_CLK_EN
         PC_CNT_EN
-    }
-    FETCH_T1 {
-        PC_CNT_EN
-        IR_CLK_EN
-        RE
     }
 
     AR_OE {
@@ -237,6 +243,118 @@ instructions {
         }
     }
 
+    CLI {
+        T0 {
+            FETCH_T0
+        }
+        T1 {
+            CLI
+        }
+        T3 {
+            RESET
+        }
+    }
+
+    SEI {
+        T0 {
+            FETCH_T0
+        }
+        T1 {
+            SEI
+        }
+        T3 {
+            RESET
+        }
+    }
+
+    IN m {
+        T0 {
+            FETCH_T0
+        }
+        T1 {
+            // load 0 (databus has pull downs)
+            AHR_CLK
+        }
+        T2 {
+            // read to ALR (default input)
+            PCOE_POSTINC_RE
+        }
+        T3 {
+            // read to accumulator from IO
+            AR_OE
+            IO_M
+            RE
+            R0_CLK_EN
+        }
+        T4 {
+            RESET
+        } 
+    }
+
+    OUT m {
+        T0 {
+            FETCH_T0
+        }
+        T1 {
+            // r0 is default OE
+            TMP_A_CLK
+        }
+        T2 {
+            // load 0 (databus has pull downs)
+            AHR_CLK
+        }
+        T3 {
+            // ALR is default input
+            PCOE_POSTINC_RE
+        }
+        T4 {
+            // hack to prevent new ALR clock cycle
+            TMP_B_CLK
+            // write accumulator to IO
+            AR_OE
+            PASS_A
+            IO_M
+            WE
+        }
+        T5 {
+            RESET
+        }
+    }
+
+    // like RET, but re-enables interrupts as well
+    RETI {
+        T0 {
+            FETCH_T0
+        }
+        T1 {
+            SP_POSTINC
+        }
+        T2 {
+            SP_OE
+            RE
+            AHR_CLK
+        }
+        T3 {
+            SP_POSTINC
+        }
+        T4 {
+            SP_OE
+            RE
+            PC_LOAD_EN
+        }
+        T5 {
+            PC_CNT_EN
+        }
+        T6 {
+            PC_CNT_EN
+            SEI
+        }
+        T7 {
+            RESET
+        }
+    }
+
+
     0x08 JMP.S m {
         T0 {
             FETCH_T0
@@ -246,7 +364,7 @@ instructions {
         }
         T2 {
             PCOE_POSTINC_RE
-            ALR_CLK
+            AHR_CLK
         }
         T3 {
             PC_OE
@@ -286,7 +404,7 @@ instructions {
         }
         T1 {
             PCOE_POSTINC_RE
-            ALR_CLK
+            AHR_CLK
         }
         T2 {
             PC_OE
@@ -303,37 +421,38 @@ instructions {
             FETCH_T0
         }
         T1 {
-            PC_H_OE
+            PC_L_OE
             TMP_A_CLK
         }
         T2 {
             PASS_A
             PUSH_DB
+            SP_POSTDEC
         }
         T3 {
-            SP_CLK_DOWN
-        }
-        T4 {
-            PC_L_OE
+            PC_H_OE
             TMP_A_CLK
         }
-        T5 {
+        T4 {
             PASS_A
             PUSH_DB
+            SP_POSTDEC
         }
-        T6 {
+        T5 {
             // put to DB from RAM
             PC_OE
             PC_CNT_EN
             RE
-            // load low address
-            ALR_CLK
+            // load high address
+            AHR_CLK
         }
-        T7 {
+        T6 {
             PC_OE
             RE
             PC_LOAD_EN
-            SP_CLK_DOWN
+        }
+        T7 {
+            RESET
         }
     }
 
@@ -342,15 +461,15 @@ instructions {
             FETCH_T0
         }
         T1 {
-            SP_CLK_UP
+            SP_POSTINC
         }
         T2 {
             SP_OE
             RE
-            ALR_CLK            
+            AHR_CLK
         }
         T3 {
-            SP_CLK_UP
+            SP_POSTINC
         }
         T4 {
             SP_OE
@@ -401,7 +520,7 @@ instructions {
         }
     }
 
-    // load the immediate value m to register rx
+    // load the immediate value imm to register rx
     0x39 LD imm, r0 {
         T0 {
             FETCH_T0
@@ -508,12 +627,11 @@ instructions {
         }
         T2 {
             PCOE_POSTINC_RE
-            ALR_CLK
+            AHR_CLK
         }
         T3 {
             PCOE_POSTINC_RE
-            // AHR_CLK implied (0xF is default active line)
-
+            ALR_CLK
         }
         T4 {
             AR_OE
@@ -563,5 +681,43 @@ instructions {
             TMP_B_CLK
         }
         * {}
+    }
+
+    // reads interrupt vector from databus and jumps
+    0xFF INT {
+        T0 {
+            FETCH_T0
+        }
+        T1 {
+            PC_L_OE
+            TMP_A_CLK
+        }
+        T2 {
+            PC_H_OE
+            TMP_B_CLK
+        }
+        T3 {
+            PASS_A
+            PUSH_DB
+            SP_POSTDEC
+        }
+        T4 {
+            PASS_B
+            PUSH_DB
+            SP_POSTDEC
+        }
+        T5 {
+            // databus has pull down, so this will load 0 to AHR
+            AHR_CLK
+            // disable interrupts
+            CLI
+        }
+        T6 {
+            INTA
+            PC_LOAD_EN
+        }
+        T7 {
+            RESET
+        }
     }
 }
