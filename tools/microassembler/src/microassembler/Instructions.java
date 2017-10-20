@@ -19,13 +19,14 @@ public class Instructions {
         
         Block previous = null;
         int opcode = 0;
-        int T;
         
         for (Block instruction : instructions) {
             
             int adr = instruction.getAddress();
             if (adr > 0)
                 opcode = adr;
+            else
+                instruction.setAddress(opcode);
             
             System.out.println(String.format("0x%02X %s", (byte)opcode, 
                 instruction.getSymbol()));
@@ -36,11 +37,19 @@ public class Instructions {
                 instruction.setBody(previous.getBody());
             }
             
-            T = 0;
             List<Block> T_states = Block.split(instruction.getBody());
             
             for (Block T_state : T_states) {
-
+                
+                // check for copy by name(address)
+                if (T_state.getSymbol().startsWith("*")) {
+                    String opToCpy = 
+                            T_state.getSymbol().replace("*", "").trim();
+                    int src = Block.get(instructions, opToCpy).getAddress();
+                    memcopy(memory, src, opcode);
+                    continue;
+                }
+                
                 while(Defines.apply(T_state));
                 
                 // check if there are duplicate line usages
@@ -75,65 +84,35 @@ public class Instructions {
                 
                 // copy to memory
                 for (int i = 0; i < Microassembler.CHIP_COUNT; i++) 
-                    memory[i][T + (opcode * T_MAX)] = value[i];
+                    memory[i][toT(T_state.getSymbol()) + (opcode * T_MAX)] 
+                            = value[i];
                 
-                T++;
             }
             
             previous = instruction;
             opcode++;
         }
     }
+    
+    private static void memcopy(int[][] memory, int src, int dst) {
+        // the first bits are T state counter; leftshift up 
+        src <<= (int) (Math.log10(T_MAX) / Math.log10(2)); // log2(T_max)
+        dst <<= (int) (Math.log10(T_MAX) / Math.log10(2));
+        
+        for (int chip = 0; chip < Microassembler.CHIP_COUNT; chip++) {
+            for (int T = 0; T < T_MAX; T++) {
+                
+                memory[chip][dst + T] = memory[chip][src + T];
+            }
+        }
+    }
+    
+    private static int toT(String symbol) {
+        symbol = symbol.replace("T", "");
+        return Integer.parseInt(symbol);
+    }
 }
 
 class Instruction {
     
 }
-
-
-/*
-            // check for wildcard T states, and copy from previous instruction
-            // block if they exist
-            if (previous != null) {
-                
-                List<Block> copies = new ArrayList<>();
-                List<Block> prev_T_states = Block.split(previous.getBody());
-                Block last = null;
-
-                for (int i = 0; i < T_states.size(); i++) {
-
-                    if (T_states.get(i).isSymbolWildcard()) {
-
-                        Block next = null;                        
-                        
-                        if (i + 1 != T_states.size())
-                            next = T_states.get(i + 1);
-
-                        for (Block T_state : prev_T_states) {
-                            
-                            if (last != null && !T_state.getSymbol()
-                                    .equals(last.getSymbol()))
-                                continue;
-                            
-                            if (last != null && T_state.getSymbol()
-                                    .equals(last.getSymbol())) {
-                                last = null;
-                                continue;
-                            }
-                            
-                            if (next != null && T_state.getSymbol()
-                                    .equals(next.getSymbol()))
-                                break;
-                            
-                            copies.add(T_state);
-                        }
-                        
-                        last = next;
-                    }
-                    else
-                        copies.add(T_states.get(i));
-                }
-                
-                T_states = copies;
-            }
-*/

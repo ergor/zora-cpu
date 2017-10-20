@@ -55,10 +55,6 @@ public class Block {
         return this.getBody().size() == 1 && this.getBody().get(0).equals("*");
     }
     
-    public boolean isSymbolWildcard() {
-        return this.symbol.equals("*");
-    }
-    
     //** STATIC METHODS **//
     public static Block get(List<Block> blocks, String symbol) {
         

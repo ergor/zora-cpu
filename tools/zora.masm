@@ -341,15 +341,9 @@ instructions {
             SP_OE
             RE
             PC_LOAD_EN
-        }
-        T5 {
-            PC_CNT_EN
-        }
-        T6 {
-            PC_CNT_EN
             SEI
         }
-        T7 {
+        T5 {
             RESET
         }
     }
@@ -534,75 +528,45 @@ instructions {
         }
     }
     LD imm, r1 {
-        T0 {
-            FETCH_T0
-        }
+        * LD imm, r0 {}
         T1 {
             PCOE_POSTINC_RE
             R1_CLK_EN
         }
-        T2 {
-            RESET
-        }
     }
     LD imm, r2 {
-        T0 {
-            FETCH_T0
-        }
+        * LD imm, r0 {}
         T1 {
             PCOE_POSTINC_RE
             R2_CLK_EN
         }
-        T2 {
-            RESET
-        }
     }
     LD imm, r3 {
-        T0 {
-            FETCH_T0
-        }
+        * LD imm, r0 {}
         T1 {
             PCOE_POSTINC_RE
-            R0_CLK_EN
-        }
-        T2 {
-            RESET
+            R3_CLK_EN
         }
     }
     LD imm, r4 {
-        T0 {
-            FETCH_T0
-        }
+        * LD imm, r0 {}
         T1 {
             PCOE_POSTINC_RE
             R4_CLK_EN
         }
-        T2 {
-            RESET
-        }
     }
     LD imm, r5 {
-        T0 {
-            FETCH_T0
-        }
+        * LD imm, r0 {}
         T1 {
             PCOE_POSTINC_RE
             R5_CLK_EN
         }
-        T2 {
-            RESET
-        }
     }
     LD imm, r6 {
-        T0 {
-            FETCH_T0
-        }
+        * LD imm, r0 {}
         T1 {
             PCOE_POSTINC_RE
             R6_CLK_EN
-        }
-        T2 {
-            RESET
         }
     }
 
@@ -648,7 +612,7 @@ instructions {
          
     }
 
-    ADD r0 {
+    0x80 ADD r0 {
         T0 {
             FETCH_T0
         }
@@ -675,48 +639,117 @@ instructions {
     }
 
     ADD r1 {
-        * {}
+        * ADD r0 {}
         T2 {
             R1_OE
             TMP_B_CLK
         }
-        * {}
+    }
+
+    ADD r2 {
+        * ADD r0 {}
+        T2 {
+            R2_OE
+            TMP_B_CLK
+        }
+    }
+
+    0x87 ADC r0 {
+
+    }
+
+    0x8E SUB.A r0 {
+
+    }
+
+    0x94 SBB.A r0 {
+
+    }
+
+    0x9A SUB.R r1 {
+
+    }
+
+    0xA0 SBB.R r1 {
+
+    }
+
+    0xA6 CMP r1 {
+
+    }
+
+    0xAC AND r1 {
+
+    }
+
+    0xB2 OR r1 {
+
+    }
+
+    0xB8 XOR r1 {
+
+    }
+
+    0xBE ADD imm {
+
+    }
+
+    ADC imm {
+
+    }
+
+    SUB.A imm {
+
+    }
+
+    SBB.A imm {
+
+    }
+
+    SUB.R imm {
+
+    }
+
+    SBB.R imm {
+
+    }
+
+    CMP imm {
+        
     }
 
     // reads interrupt vector from databus and jumps
+    // DO NOT USE DIRECTLY
     0xFF INT {
         T0 {
-            FETCH_T0
-        }
-        T1 {
             PC_L_OE
             TMP_A_CLK
         }
-        T2 {
+        T1 {
             PC_H_OE
             TMP_B_CLK
         }
-        T3 {
+        T2 {
             PASS_A
             PUSH_DB
             SP_POSTDEC
         }
-        T4 {
+        T3 {
             PASS_B
             PUSH_DB
             SP_POSTDEC
         }
-        T5 {
+        T4 {
             // databus has pull down, so this will load 0 to AHR
             AHR_CLK
             // disable interrupts
             CLI
         }
-        T6 {
+        T5 {
             INTA
             PC_LOAD_EN
         }
-        T7 {
+        T6 {
             RESET
         }
     }
