@@ -170,6 +170,10 @@ define {
     ALUOP_XOR {
         ALUOP_2
     }
+    ALUOP_AND {
+        ALUOP_1
+        ALUOP_2
+    }
     ALUOP_ADD {
         ALUOP_0
         ALUOP_1
@@ -201,7 +205,7 @@ define {
     PASS_B {
         TMP_B_OE
         ALU_OE
-        ALUOP_XOR
+        ALUOP_AND
     }
     ADD_A_B {
         TMP_A_OE
@@ -513,6 +517,87 @@ instructions {
             RESET
         }
     }
+    MOV r0, r2 {
+        * MOV r0, r1 {}
+        T2 {
+            PASS_A
+            R2_CLK_EN
+        }
+    }
+    MOV r0, r3 {
+        * MOV r0, r1 {}
+        T2 {
+            PASS_A
+            R3_CLK_EN
+        }
+    }
+    MOV r0, r4 {
+        * MOV r0, r1 {}
+        T2 {
+            PASS_A
+            R4_CLK_EN
+        }
+    }
+    MOV r0, r5 {
+        * MOV r0, r1 {}
+        T2 {
+            PASS_A
+            R5_CLK_EN
+        }
+    }
+    MOV r0, r6 {
+        * MOV r0, r1 {}
+        T2 {
+            PASS_A
+            R6_CLK_EN
+        }
+    }
+    MOV r1, r0 {
+        * MOV r0, r1 {}
+        T1 {
+            R1_OE
+            TMP_A_CLK
+        }
+        T2 {
+            PASS_A
+            R0_CLK_EN
+        }
+    }
+    MOV r1, r2 {
+        * MOV r1, r0 {}
+        T2 {
+            PASS_A
+            R2_CLK_EN
+        }
+    }
+    MOV r1, r3 {
+        * MOV r1, r0 {}
+        T2 {
+            PASS_A
+            R3_CLK_EN
+        }
+    }
+    MOV r1, r4 {
+        * MOV r1, r0 {}
+        T2 {
+            PASS_A
+            R4_CLK_EN
+        }
+    }
+    MOV r1, r5 {
+        * MOV r1, r0 {}
+        T2 {
+            PASS_A
+            R5_CLK_EN
+        }
+    }
+    MOV r1, r6 {
+        * MOV r1, r0 {}
+        T2 {
+            PASS_A
+            R6_CLK_EN
+        }
+    }
 
     // load the immediate value imm to register rx
     0x39 LD imm, r0 {
@@ -715,7 +800,7 @@ instructions {
     }
 
     CMP imm {
-        
+
     }
 
     // reads interrupt vector from databus and jumps

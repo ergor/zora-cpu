@@ -154,9 +154,9 @@ This file is intended to be loaded by Logisim (http://www.cburch.com/logisim/).
     <wire from="(1220,190)" to="(1260,190)"/>
     <wire from="(700,1370)" to="(700,1440)"/>
     <wire from="(1000,170)" to="(1000,620)"/>
+    <wire from="(460,380)" to="(460,390)"/>
     <wire from="(980,820)" to="(980,850)"/>
     <wire from="(680,610)" to="(720,610)"/>
-    <wire from="(460,380)" to="(460,400)"/>
     <wire from="(1050,640)" to="(1110,640)"/>
     <wire from="(980,850)" to="(980,940)"/>
     <wire from="(1220,1410)" to="(1220,1480)"/>
@@ -203,6 +203,7 @@ This file is intended to be loaded by Logisim (http://www.cburch.com/logisim/).
     <wire from="(1180,440)" to="(1220,440)"/>
     <wire from="(1180,1480)" to="(1220,1480)"/>
     <wire from="(640,520)" to="(700,520)"/>
+    <wire from="(460,270)" to="(460,280)"/>
     <wire from="(380,430)" to="(380,440)"/>
     <wire from="(510,650)" to="(550,650)"/>
     <wire from="(910,1290)" to="(910,1510)"/>
@@ -433,7 +434,6 @@ This file is intended to be loaded by Logisim (http://www.cburch.com/logisim/).
     <wire from="(230,270)" to="(350,270)"/>
     <wire from="(1020,320)" to="(1020,580)"/>
     <wire from="(880,940)" to="(980,940)"/>
-    <wire from="(460,280)" to="(460,300)"/>
     <wire from="(1160,320)" to="(1160,450)"/>
     <wire from="(680,500)" to="(680,530)"/>
     <wire from="(1050,620)" to="(1110,620)"/>
@@ -681,6 +681,9 @@ This file is intended to be loaded by Logisim (http://www.cburch.com/logisim/).
       <a name="label" val="/AR OE"/>
       <a name="labelfont" val="SansSerif plain 9"/>
     </comp>
+    <comp lib="0" loc="(460,270)" name="Pull Resistor">
+      <a name="pull" val="1"/>
+    </comp>
     <comp lib="0" loc="(560,1570)" name="Splitter">
       <a name="fanout" val="1"/>
       <a name="incoming" val="16"/>
@@ -701,6 +704,9 @@ This file is intended to be loaded by Logisim (http://www.cburch.com/logisim/).
       <a name="bit13" val="none"/>
       <a name="bit14" val="none"/>
       <a name="bit15" val="none"/>
+    </comp>
+    <comp lib="0" loc="(460,390)" name="Pull Resistor">
+      <a name="facing" val="north"/>
     </comp>
     <comp lib="0" loc="(1150,190)" name="Splitter">
       <a name="facing" val="west"/>
@@ -759,9 +765,6 @@ This file is intended to be loaded by Logisim (http://www.cburch.com/logisim/).
       <a name="control" val="left"/>
     </comp>
     <comp loc="(740,330)" name="Buffer tri state 8bit"/>
-    <comp lib="0" loc="(460,400)" name="Pull Resistor">
-      <a name="facing" val="north"/>
-    </comp>
     <comp lib="0" loc="(1200,300)" name="Splitter">
       <a name="facing" val="south"/>
       <a name="fanout" val="1"/>
@@ -904,9 +907,6 @@ This file is intended to be loaded by Logisim (http://www.cburch.com/logisim/).
       <a name="facing" val="east"/>
       <a name="label" val="RE"/>
       <a name="labelfont" val="SansSerif plain 9"/>
-    </comp>
-    <comp lib="0" loc="(460,300)" name="Pull Resistor">
-      <a name="facing" val="north"/>
     </comp>
     <comp lib="0" loc="(350,440)" name="Tunnel">
       <a name="facing" val="east"/>
