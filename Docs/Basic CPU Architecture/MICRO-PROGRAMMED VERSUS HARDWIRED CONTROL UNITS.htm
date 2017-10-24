@@ -1,0 +1,733 @@
+<!DOCTYPE html PUBLIC "-//w3c//dtd html 4.0 transitional//en">
+<html><head>
+   <meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+   <meta name="Generator" content="Microsoft Word 97">
+   <meta name="GENERATOR" content="Mozilla/4.79 [en] (Windows NT 5.0; U) [Netscape]">
+   <title>MICRO-PROGRAMMED VERSUS HARDWIRED CONTROL UNITS;</title>
+</head>
+<body>
+
+<center><b><font size="+1">MICRO-PROGRAMMED VERSUS HARDWIRED CONTROL UNITS:</font></b>
+<br><b><font size="+1">HOW COMPUTERS REALLY WORK</font></b>
+<br>Richard R. Eckert
+<br>Department of Computer Science
+<br>State University of New York
+<br>Binghamton, NY 13901
+<br>Much taken from SIGCSE Bulletin, Vol. 20, No. 3, September 1988, pages
+13-22</center>
+
+<p><br>
+<br>
+<br>
+<br>
+<br>
+</p><p><b>Introduction</b>
+</p><p>For too many students of computer science, the level of understanding
+of how digital computers really execute programs never quite makes it beyond
+that of "black magic.<font face="WP TypographicSymbols">"</font> Many of
+them know what the basic parts of the computer are and what kinds of actions
+occur in each. But, in too many cases, they cannot put it all together
+and formulate a clear <font face="WP TypographicSymbols">"</font>big picture<font face="WP TypographicSymbols">"</font>
+of what is really going on inside the machine. In this article we present
+a simple computer architecture and describe in detail two alternative ways
+in which its control section may be organized.
+<br>&nbsp;
+</p><p><b>The Basic Computer</b>
+</p><p>Every student of computer science knows that all traditional digital
+computers have two principal functional parts: the data path section in
+which processing occurs and the control section which is responsible for
+decoding instructions and leaving the correct sequence of control signals
+to make the processing happen in the data path.. Basically there are two
+types of control units: hard-wired controllers and micro-programmed controllers.
+In order to appreciate the difference and see how computers really work,
+we present a very simple computer. A block diagram of its data path sections
+is shown in Figure 1.
+</p><p>A single 12-bit-wide bus provides for exchange of information between
+pairs of registers within the data path section. The registers and the
+256 X 12 bit RAM memory are controlled by 16 control signals. Most of the
+registers have Load (L) and Enabled (E) signals. An active L signal to
+a register causes the contents of the bus to be clocked into that register
+on the next rising pulse from the system clock. An active E signal enables
+the tristate outputs of the register, thereby making its contents available
+to the bus. Therefore, a register transfer from, for example, register
+A to register B would require active EA and LB control signals.
+</p><p>Processing of data is done by the Arithmetic-Logic-Unit (ALU), a circuit
+that is capable of adding or subtracting the 12-bit numbers contained in
+its two input registers: the accumulator (ACC) and register B. The operation
+performed by the ALU is selected by the Add (A) or Subtract (S) control
+signals. The accumulator also contains a single flip-flop that is set whenever
+its contents are negative (i.e., whenever the leading bit is set<font face="WP TypographicSymbols">--</font>meaning
+a negative 2's complement number). The value of this "negative flag<font face="WP TypographicSymbols">"</font>
+provides input to the controller/sequencer, and, as we shall see, permits
+implementation of conditional branching instructions.
+</p><p>The machine<font face="WP TypographicSymbols">'</font>s RAM memory is
+accessed by first placing the 8-bit address in the Memory Address Register
+(MAR). An active Read (R) control signal to the RAM will then cause the
+selected word from the RAM to appear in the Memory Data Register (MDR).
+An active Write (W) signal, on the other hand, will cause the word contained
+in the MDR to be stored in the RAM at the address specified by the MAR.
+Since there are no input or output ports in this simple computer, all I/O
+is memory mapped. In other words, several memory locations are reserved
+for input/output devices. Memory reads from any of those locations will
+cause data from the corresponding input device to appear in the MDR; memory
+writes to them will cause data in the MDR to be sent to the corresponding
+output device. A word stored in any given memory location may be data to
+be manipulated by the computer or a coded instruction that specifies an
+action to be taken.
+</p><p>The data path section also contains a Program Counter (PC) whose function
+it is to point to the address in RAM of the next instruction to be executed.
+The Increment Program Counter (IP) control signal causes the contents of
+the PC to increase by one. Since, as we shall see, instructions on this
+machine are one word long, this provides a simple mechanism for sequential
+instruction execution. In addition there is an Instruction Register (IR)
+which holds the instruction that is about to be execute and provides its
+opcode to the controller/sequencer.
+<br>&nbsp;
+</p><p><b>The Computer<font face="WP TypographicSymbols">'</font>s Instruction
+Set</b>
+</p><p>An instruction on our simple computer consists of one 12-bit word. The
+leading four bits form the operation code (opcode) which specifies the
+action to be taken, and the remaining 8 bits, when used, indicate the memory
+address of one of the instruction<font face="WP TypographicSymbols">'</font>s
+operands. For those instructions that have two operands, the other operand
+is always contained within the accumulator.
+</p><p>Table 1 gives eight instructions that form the instruction set we have
+chosen for our machine. Also shown in the table is the sequence of control
+signals necessary for execution of each of the instructions in the machine<font face="WP TypographicSymbols">'</font>s
+instruction set and for fetching the next instruction. In each case the
+register transfers required for execution of each step are shown. For example,
+in the case of the LDA (load accumulator) instruction, the first step consists
+of copying the address of the operand, contained in the least significant
+8 bits of the instruction register, to the memory address register. Thus
+the EI (enable IR) and LM (load MAR) control signals are active. The next
+step is to read the operand from memory into the memory data register.
+An active R (memory read) signal performs that task. The last step required
+to execute the LDA instruction is to copy the contents of the memory data
+register to the accumulator. Active ED (enable MDR) and LA (load accumulator)
+do the trick.
+<br>&nbsp;
+</p><p><b>The Hard-Wired Control Unit</b>
+</p><p>Figure 2 is a block diagram showing the internal organization of a hard-wired
+control unit for our simple computer. Input to the controller consists
+of the 4-bit opcode of the instruction currently contained in the Instruction
+Register and the negative flag from the accumulator. The controller<font face="WP TypographicSymbols">'</font>s
+output is a set of 16 control signals that go out to the various registers
+and to the memory of the computer, in addition to a HLT signal that is
+activated whenever the leading bit of the op-code is one. The controller
+is composed of the following functional units: A ring counter, an instruction
+decoder, and a control matrix.
+</p><p>The ring counter provides a sequence of six consecutive active signals
+that cycle continuously. Synchronized by the system clock, the ring counter
+first activates its T0 line, then its T1 line, and so forth. After T5 is
+active, the sequence begins again with T0. Figure 3 shows how the ring
+counter might be organized internally.
+</p><p>The instruction decoder takes its four-bit input from the op-code field
+of the instruction register and activates one and only one of its 8 output
+lines. Each line corresponds to one of the instructions in the computer<font face="WP TypographicSymbols">'</font>s
+instruction set. Figure 4 shows the internal organization of this decoder.
+</p><p>The most important part of the hard-wired controller is the control
+matrix. It receives input from the ring counter and the instruction decoder
+and provides the proper sequence of control signals. Figure 5 is a diagram
+of how the control matrix for our simple machine might be wired. To understand
+how this diagram was obtained, we must look carefully at the machine<font face="WP TypographicSymbols">'</font>s
+instruction set (Table 1). Table 2 shows which control signals must be
+active at each ring counter pulse for each of the instructions in the computer<font face="WP TypographicSymbols">'</font>s
+instruction set (and for the instruction fetch operation). The table was
+prepared by simply writing down the instructions in the left-hand column.
+(In the circuit these will be the output lines from the decoder). The various
+control signals are placed horizontally along the top of the table. Entries
+into the table consist of the moments (ring counter pulses T0, T1, T2,
+T3, T4, or T5) at which each control signal must be active in order to
+have the instruction executed. This table is prepared very easily by reading
+off the information for each instruction given in Table 1. For example,
+the Fetch operation has the EP and LM control signals active at ring count
+1, and ED, LI, and IPC active at ring count 2. Therefore the first row
+(Fetch) of Table 2 has T0 entered below EP and LM, T1 below R, and T2 below
+IP, ED, and LI.
+</p><p>Once Table 2 has been prepared, the logic required for each control
+signal is easily obtained. For each an AND operation is performed between
+any active ring counter (Ti) signals that were entered into the signal<font face="WP TypographicSymbols">'</font>s
+column and the corresponding instruction contained in the far left-hand
+column. If a column has more than one entry, the output of the ANDs are
+ORed together to produce the final control signal. For example, the LM
+column has the following entries: T0 (Fetch), T3 associated with the LDA
+instruction, and T3 associated with the STA instruction. Therefore, the
+logic for this signal is:
+</p><p>LM = T0 + T3*LDA + T3*STA
+</p><p>This means that control signal LM will be activated whenever any of
+the following conditions is satisfied: (1) ring pulse T0 (first step of
+an instruction fetch) is active, or (2) an LDA instruction is in the IR
+and the ring counter is issuing pulse 3, or (3) and STA instruction is
+in the IR and the ring counter is issuing pulse 3.
+</p><p>The entries in the JN (Jump Negative) row of this table require some
+further explanation. The LP and EI signals are active during T3 for this
+instruction if and only if the accumulator<font face="WP TypographicSymbols">'</font>s
+negative flag has been set. Therefore the entries that appear above these
+signals for the JN instruction are T3*NF, meaning that the state of the
+negative flag must be ANDed in for the LP and EI control signals.
+</p><p>Figure 6 gives the logical equations required for each of the control
+signals used on our machine. These equations have been read from Table
+2, as explained above. The circuit diagram of the control matrix (Figure
+5) is constructed directly from these equations.
+</p><p>It should be noticed that the HLT line from the instruction decoder
+does not enter the control matrix, Instead this signal goes directly to
+circuitry (not shown) that will stop the clock and thus terminate execution.
+<br>&nbsp;
+</p><p><b>A Micro-programmed Control Unit</b>
+</p><p>As we have seen, the controller causes instructions to be executed by
+issuing a specific set of control signals at each beat of the system clock.
+Each set of control signals issued causes one basic operation (micro-operation),
+such as a register transfer, to occur within the data path section of the
+computer. In the case of a hard-wired control unit the control matrix is
+responsible for sending out the required sequence of signals.
+</p><p>An alternative way of generating the control signals is that of micro-programmed
+control. In order to understand this method it is convenient to think of
+sets of control signals that cause specific micro-operations to occur as
+being "microinstructions" that could be stored in a memory. Each bit of
+a microinstruction might correspond to one control signal. If the bit is
+set it means that the control signal will be active; if cleared the signal
+will be inactive. Sequences of microinstructions could be stored in an
+internal <font face="WP TypographicSymbols">"</font>control<font face="WP TypographicSymbols">"</font>
+memory. Execution of a machine language instruction could then be caused
+by fetching the proper sequence of microinstructions from the control memory
+and sending them out to the data path section of the computer. A sequence
+of microinstructions that implements an instruction on the external computer
+is known as a micro-routine. The instruction set of the computer is thus
+determined by the set of micro-routines, the <font face="WP TypographicSymbols">"</font>microprogram,<font face="WP TypographicSymbols">"</font>
+stored in the controller<font face="WP TypographicSymbols">'</font>s memory.
+The control unit of a microprogram-controlled computer is essentially a
+computer within a computer.
+</p><p>Figure 7 is a block diagram of a micro-programmed control unit that
+may be used to implement the instruction set of the computer we described
+above. The heart of the controller is the control 32 X 24 ROM memory in
+which upt to 32 24-bit long microinstructions can be stored. Each is composed
+of two main fields: a 16-bit wide control signal field and an 8-bit wide
+next-address field. Each bit in the control signal field corresponds to
+one of the control signals discussed above. The next-address field contains
+bits that determine the address of the next microinstruction to be fetched
+from the control ROM. We shall see the details of how these bits work shortly.
+Words selected from the control ROM feed the microinstruction register.
+This 24-bit wide register is analogous to the outer machine<font face="WP TypographicSymbols">'</font>s
+instruction register. Specifically, the leading 16 bits (the control-signal
+field) of the microinstruction register are connected to the control-signal
+lines that go to the various components of the external machine<font face="WP TypographicSymbols">'</font>s
+data path section.
+</p><p>Addresses provided to the control ROM come from a micro-counter register,
+which is analogous to the external machine<font face="WP TypographicSymbols">'</font>s
+program counter. The micro-counter, in turn, receives its input from a
+multiplexer which selects from : (1) the output of an address ROM, (2)
+a current-address incrementer, or (3) the address stored in the next-address
+field of the current microinstruction. The logic that selects one of these
+three alternatives will be explained shortly.
+</p><p>The controller<font face="WP TypographicSymbols">'</font>s address ROM
+is fed by the outer computer<font face="WP TypographicSymbols">'</font>s
+instruction register. The address ROM maps the op-code of the instruction
+currently contained in the op-code field of the instruction register to
+the starting address of the corresponding microroutine in the control ROM.
+Address zero of the address ROM contains the control-ROM address of the
+fetch routine; each other addresses in the address-ROM corresponds to one
+of the op-codes of the computer<font face="WP TypographicSymbols">'</font>s
+instruction set. Table 3 shows the contents of the address ROM for the
+instruction set of our simple computer. To see how the address ROM works,
+let us assume that an ADD instruction has been fetched into the outer computer<font face="WP TypographicSymbols">'</font>s
+instruction register. Since the op-code of the ADD instruction is 3, the
+number stored at location 3 of the address ROM (a 9) is the starting address
+in the control ROM of the microroutine that implements the ADD instruction.
+</p><p>Details of a microinstruction<font face="WP TypographicSymbols">'</font>s
+next address field are shown in Figure 8. The 5-bit CRJA (Control ROM Jump
+Address) sub-field holds a microinstruction address. Thus, the address
+of the next microinstruction may be obtained from the current microinstruction.
+This permits branching to other sections within the microprogram. The combination
+of the MAP bit, the CD (condition) bit, and the negative flag from the
+accumulator of the external machine provide input to the logic that feeds
+the select lines of the multiplexer and thereby determine how the address
+of the next microinstruction will be obtained.
+</p><p>If the MAP bit is one, the logic attached to the multiplexer<font face="WP TypographicSymbols">'</font>s
+select lines produces a 01 which selects the address ROM. Therefore, the
+address of the micro-routine corresponding to the instruction in the outer
+machine<font face="WP TypographicSymbols">'</font>s instruction register
+will be channeled to the control ROM. It should be clear that the MAP bit
+must be set in the last microinstruction of the <font face="WP TypographicSymbols">"</font>fetch<font face="WP TypographicSymbols">"</font>
+micro-routine, since it is at that moment that we want the newly-fetched
+instruction to be executed.
+</p><p>If the MAP bit is zero and the CD bit is zero, (unconditional branch),
+the multiplexer logic produces a 10, which selects the CRJA field of the
+current instruction. Therefore, the next instruction will come from the
+address contained in the current instruction<font face="WP TypographicSymbols">'</font>s
+next-address field. With MAP=0 and CD=1 (conditional branch), the logic
+that feeds the multiplexer will produce either a 00 or a 10, depending
+on the value of the negative flag. If the flag is set, it is a 10, which
+selects the jump address contained in the current microinstruction. If
+the negative flag is cleared, the select lines to the multiplexer receive
+a 00, which causes the incrementer to be selected. The next microinstruction
+will come from the next address in sequence. It should be noticed that
+with this scheme, if we are not doing branching, the CRJA field should
+contain the address of the next microinstruction and the CD bit should
+be cleared. This will cause <font face="WP TypographicSymbols">"</font>branch
+to the next microinstruction<font face="WP TypographicSymbols">"</font>
+to occur. The one exception to this rule is the case of the last microinstruction
+within a micro-routine. Normally we would then want to branch back to the
+<font face="WP TypographicSymbols">"</font>fetch<font face="WP TypographicSymbols">"</font>
+micro-routine. Since this routine starts at control-ROM location 00000,
+that address should be contained in the CRJA field and CD should be 0.
+</p><p>The HLT bit is used to terminate execution. If it is set, the clock
+that synchronizes activities within the entire machine is stopped.
+</p><p>Notice that the micro-counter is triggered by a rising clock edge, and
+the microinstruction register by a falling edge. Thus, we see that on each
+positive edge, the micro-counter receives the address of the microinstruction
+and presents it to the control ROM, which has until the next negative edge
+to output the addressed control word to the microinstruction register.
+Since all operation in the data path section are positive-edge triggered,
+there is adequate time for the signals specified in the control word contained
+in the microinstruction register to go out to all sections of the external
+machine. The sequence of latching the address of microinstruction i+1 into
+the micro-counter while microinstruction i executes (positive edge) and
+then presenting the control word of microinstruction i+1 to the microinstruction
+register (negative edge) continues until a set HLT bit stops the clock.
+</p><p>Table 4 shows a microprogram which, when loaded into the control ROM,
+will implement the instruction set of the computer we have been describing.
+For each microinstruction, the control ROM address has been expressed in
+hexadecimal, and the contents in binary. The order of the bits in the control
+signal field is the same as that shown in table 2: IP, LP, EP, LM, R, W,
+LD, ED, LI, EI, LA, EA, A, S, EU, LB, reading from left to right. The last
+four columns of table 4 express the status of the CD, MAP, and HLT bits,
+and the Control ROM Jump Address, expressed in hexadecimal. In order to
+clarify how the microprogram works, a description is now given of the <font face="WP TypographicSymbols">"</font>fetch<font face="WP TypographicSymbols">"</font>
+and JN (jump on negative) micro-routines.
+</p><p>The <font face="WP TypographicSymbols">"</font>fetch<font face="WP TypographicSymbols">"</font>
+micro-routine occupies control ROM addresses 0, 1, and 2. The active EP
+and LM control-signal bits in its first microinstruction cause a register
+transfer from the program counter to the memory address register to occur.
+The MAR will now contain the address in RAM of the next instruction. Since
+CD and MAP are both zero (unconditional branch), the next microinstruction
+will come from the address stored in the CRJA field (01) <font face="WP TypographicSymbols">--</font>
+the next consecutive location. The microinstruction stored at that location
+has only the R bit active. Thus, the word stored in the memory location
+being accessed by the MAR (presumably the next instruction ) will be gated
+to the Memory Data Register (MDR). The zeroes in CD and MAP again cause
+the microinstruction to be fetched from the address specified in the CRJA
+field, (02). Active control signal bits for that microinstruction are ED,
+LI, and IP. The first two transfer the word in the MDR to the Instruction
+Register, and the last increments the program counter. The new instruction
+is safely in the IR, and the PC is pointing to the next instruction in
+sequence. We have completed an instruction fetch. Since the MAP field in
+the last microinstruction of this <font face="WP TypographicSymbols">"</font>fetch<font face="WP TypographicSymbols">"</font>
+micro-routine is equal to 1, the address of the next microinstruction is
+determined by the address ROM, which, in turn, depends upon the opcode
+of the instruction that has just been loaded into the instruction register.
+</p><p>When the JN instruction is executed, control is supposed to be transferred
+to the address specified by the least significant eight bits of the number
+contained in the instruction register if the negative flag is set. If the
+negative flag is not set, execution should continue with the next instruction
+in sequence. Let us see how the micro-routine stored at control-ROM locations
+0F, 10, and 11 implement this conditional jump. In the first microinstruction,
+none of the control signal bits is set. Thus, nothing will occur in the
+data path section of the computer. However, the fact that the CD bit is
+set means that IF THE NEGATIVE FLAG IS SET, the next microinstruction will
+be fetched from the control-ROM address specified in the CRJA field (11
+in this case). The microinstruction stored at that location has the EI
+and LP control signal bits set. Thus, the contents of the instruction register
+(the least significant eight bits) will be transferred to the program counter.
+The zeroes stored in the CD and MAP bits cause the next microinstruction
+to be fetched from the address contained in the CRJA field -- a 00 in this
+case. This is the start of the <font face="WP TypographicSymbols">"</font>fetch<font face="WP TypographicSymbols">"</font>
+micro-routine. Thus we see that if the negative flag is set, the JN micro-routine
+places the jump address in the program counter and transfer to the fetch
+routine. When that fetch is performed, control will have been transferred
+to the jump address.
+</p><p>If, on the other hand, the negative flag is NOT SET when the JN micro-routine
+executes, then the set CD bit in its first microinstruction causes the
+current address stored in the micro-counter to be incremented. Thus, the
+next microinstruction would be fetched from location 10. That microinstruction
+also has no active control signals bits, but with CD=0 and CRJA=00, the
+next microinstruction will be the first one in the <font face="WP TypographicSymbols">"</font>fetch<font face="WP TypographicSymbols">"</font>
+routine. Notice that in this case, the JN instruction simply returns us
+to the next fetch. Since the program counter has not been altered, that
+fetch will be from the next sequential memory location, as usual.
+<br>&nbsp;
+</p><p><b>Hardwired vs. Micro-programmed Computers</b>
+</p><p>It should be mentioned that most computers today are micro-programmed.
+The reason is basically one of flexibility. Once the control unit of a
+hard-wired computer is designed and built, it is virtually impossible to
+alter its architecture and instruction set. In the case of a micro-programmed
+computer, however, we can change the computer<font face="WP TypographicSymbols">'</font>s
+instruction set simply by altering the microprogram stored in its control
+memory. In fact, taking our basic computer as an example, we notice that
+its four-bit op-code permits up to 16 instructions. Therefore, we could
+add seven more instructions to the instruction set by simply expanding
+its microprogram. To do this with the hard-wired version of our computer
+would require a complete redesign of the controller circuit hardware.
+</p><p>Another advantage to using micro-programmed control is the fact that
+the task of designing the computer in the first place is simplified. The
+process of specifying the architecture and instruction set is now one of
+software (micro-programming) as opposed to hardware design. Nevertheless,
+for certain applications hard-wired computers are still used. If speed
+is a consideration, hard-wiring may be required since it is faster to have
+the hardware issue the required control signals than to have a <font face="WP TypographicSymbols">"</font>program<font face="WP TypographicSymbols">"</font>
+do it.
+</p><p><b>Summary</b>
+</p><p>The intent of this article has been to present, through example, the
+distinction between hardwired and micro-programmed computers. In the process,
+it is hoped that the reader has gained insight into what really occurs
+inside a digital computer as a program executes.
+<br>&nbsp;
+</p><p><b>FIGURES:</b>
+</p><p><img src="MICRO-PROGRAMMED%20VERSUS%20HARDWIRED%20CONTROL%20UNITS_files/wk15fig1.JPG" height="425" width="644">
+<br><b>Figure 1. A Simple Single-Bus Basic Computer.</b>
+<br><br>
+<br>
+<br><img src="MICRO-PROGRAMMED%20VERSUS%20HARDWIRED%20CONTROL%20UNITS_files/Control-Unit.GIF" height="381" width="470">
+<br><b>Figure 2. A Block diagram of the Basic Computer's Hard-wired Control
+unit</b>
+<br>&nbsp;
+<br>&nbsp;
+</p><p><img src="MICRO-PROGRAMMED%20VERSUS%20HARDWIRED%20CONTROL%20UNITS_files/ring_ctrA50_50_fin_mono.GIF" height="122" width="273">
+</p><p><b>Figure 3. The Internal Organization of the Ring Counter</b>
+<br>&nbsp;
+<br>&nbsp;
+<br>&nbsp;
+</p><p><img src="MICRO-PROGRAMMED%20VERSUS%20HARDWIRED%20CONTROL%20UNITS_files/decoder120_120_redrawn.GIF" height="209" width="255">
+</p><p><b>Figure 4. The Internal Organization of the Hard-wired Instruction
+Decoder</b>
+<br>&nbsp;
+<br>&nbsp;
+<br>&nbsp;
+</p><p><img src="MICRO-PROGRAMMED%20VERSUS%20HARDWIRED%20CONTROL%20UNITS_files/control_matrix_wideNew.GIF" height="663" width="773">
+</p><p><b>Figure 5. The Internal Organization of the Hard-wired Control Matrix</b>
+<br><br>
+<br>
+<br>&nbsp;
+</p><p>&nbsp;&nbsp;&nbsp; IP = T2
+<br>&nbsp;&nbsp;&nbsp; W = T5*STA
+<br>&nbsp;&nbsp;&nbsp; LP = T3*JMP + T3*NF*JN
+<br>&nbsp;&nbsp;&nbsp; LD = T4*STA
+<br>&nbsp;&nbsp;&nbsp; LA = T5*LDA + T4*ADD + T4*SUB
+<br>&nbsp;&nbsp;&nbsp; EA = T4*STA + T3*MBA
+<br>&nbsp;&nbsp;&nbsp; EP = T0
+<br>&nbsp;&nbsp;&nbsp; S = T3*SUB
+<br>&nbsp;&nbsp;&nbsp; A = T3*ADD
+<br>&nbsp;&nbsp;&nbsp; LI = T2
+<br>&nbsp;&nbsp;&nbsp; LM = T0 + T3*LDA + T3*STA
+<br>&nbsp;&nbsp;&nbsp; ED = T2 + T5*LDA
+<br>&nbsp;&nbsp;&nbsp; R = T1 + T4*LDA
+<br>&nbsp;&nbsp;&nbsp; EU = T3*ADD+T3*SUB
+<br>&nbsp;&nbsp;&nbsp; EI = T3*LDA + T3*STA + T3*JMP + T3*NF*JN
+<br>&nbsp;&nbsp;&nbsp; LB = T3*MBA
+</p><p><b>Figure 6.&nbsp; The logical equations required for each of the hardwired
+control signals on the basic computer.&nbsp; The machine's control matrix
+is designed from these equations.</b>
+<br><br>
+<br>
+</p><p><img src="MICRO-PROGRAMMED%20VERSUS%20HARDWIRED%20CONTROL%20UNITS_files/micrco-controlled-control-unit-new.GIF" height="680" width="606">
+<br><br>
+<br>
+<b>Figure 7. A Microprogrammed Control Unit for the Simple Computer</b>
+<br>&nbsp;
+<br>&nbsp;
+</p><p><img src="MICRO-PROGRAMMED%20VERSUS%20HARDWIRED%20CONTROL%20UNITS_files/fig8.jpg" height="151" width="575">
+</p><p><b>TABLES:</b>
+</p><p><b><font size="-1">Table 1. An Instruction Set For The Basic Computer</font></b>
+</p><p><tt><font size="-1">Instruction&nbsp;&nbsp; 
+Op-Code&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Execution&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+Register&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Ring&nbsp;&nbsp;
+ Active Control</font></tt>
+<br><tt><font size="-1">Mnemonic&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Action&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+ 
+Transfers&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Pulse&nbsp;
+ Signals</font></tt>
+<br><font size="-1">------------------------------------------------------------------------------------------------------------------------------------</font>
+<br><tt><font size="-1">LDA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ACC&lt;--(RAM)&nbsp;&nbsp;&nbsp;&nbsp;
+1. MAR &lt;-- IR&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 3&nbsp;&nbsp;&nbsp;&nbsp;
+EI, LM</font></tt>
+<br><tt><font size="-1">(Load 
+ACC)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+2.
+ MDR &lt;-- RAM(MAR)&nbsp;&nbsp; 4&nbsp;&nbsp;&nbsp;&nbsp; R</font></tt>
+<br><tt><font size="-1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+3.
+ ACC &lt;-- MDR&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+5&nbsp;&nbsp;&nbsp;&nbsp;
+ED, LA</font></tt>
+</p><p><tt><font size="-1">STA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (RAM) &lt;--ACC&nbsp;&nbsp;&nbsp;&nbsp;
+1. MAR &lt;-- IR&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 3&nbsp;&nbsp;&nbsp;&nbsp;
+EI, LM</font></tt>
+<br><tt><font size="-1">(Store 
+ACC)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+2.
+ MDR &lt;-- ACC&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+4&nbsp;&nbsp;&nbsp;&nbsp;
+EA, LD</font></tt>
+<br><tt><font size="-1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+3.
+ RAM(MAR) &lt;-- MDR&nbsp;&nbsp; 5&nbsp;&nbsp;&nbsp;&nbsp; W</font></tt>
+</p><p><tt><font size="-1">ADD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ACC &lt;-- ACC
++ B&nbsp; 1. ALU &lt;-- ACC + B&nbsp;&nbsp;&nbsp; 3&nbsp;&nbsp;&nbsp;&nbsp;
+A</font></tt>
+<br><tt><font size="-1">(Add B to 
+ACC)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+2.
+ ACC &lt;-- ALU&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+4&nbsp;&nbsp;&nbsp;&nbsp;
+EU, LA</font></tt>
+</p><p><tt><font size="-1">SUB&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ACC &lt;-- ACC
+- B&nbsp; 1. ALU &lt;-- ACC - B&nbsp;&nbsp;&nbsp; 3&nbsp;&nbsp;&nbsp;&nbsp;
+S</font></tt>
+<br><tt><font size="-1">(Sub. B from 
+ACC)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+2.
+ ACC &lt;-- ALU&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+4&nbsp;&nbsp;&nbsp;&nbsp;
+EU, LA</font></tt>
+</p><p><tt><font size="-1">MBA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; B &lt;-- ACC&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+1. B &lt;-- A&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+3&nbsp;&nbsp;&nbsp;&nbsp; EA, LB</font></tt>
+<br><tt><font size="-1">(Move ACC to B)</font></tt>
+</p><p><tt><font size="-1">JMP&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; PC &lt;-- RAM&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+1. PC &lt;-- IR&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 3&nbsp;&nbsp;&nbsp;&nbsp;
+EI, LP</font></tt>
+<br><tt><font size="-1">(Jump to</font></tt>
+<br><tt><font size="-1">&nbsp;Address)</font></tt>
+</p><p><tt><font size="-1">JN&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+7&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; PC &lt;-- RAM&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+1. PC &lt;-- IR&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 3&nbsp;&nbsp;&nbsp;&nbsp;
+NF: EI, LP</font></tt>
+<br><tt><font size="-1">(Jump if&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+if negative&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if NF set</font></tt>
+<br><tt><font size="-1">&nbsp;Negative)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+flag is set</font></tt>
+</p><p><tt><font size="-1">HLT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+8-15&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Stop clock</font></tt>
+</p><p><tt><font size="-1">"Fetch"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+IR
+ &lt;-- Next&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1. MAR &lt;-- 
+PC&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0&nbsp;&nbsp;&nbsp;&nbsp; EP, LM</font></tt>
+<br><tt><font size="-1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Instruction&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+ 2. MDR &lt;-- RAM(MAR)&nbsp;&nbsp;
+1&nbsp;&nbsp;&nbsp;&nbsp; R</font></tt>
+<br><tt><font size="-1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+3.
+ IR &lt;-- MDR&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+2&nbsp;&nbsp;&nbsp;
+ED, LI, IP</font></tt>
+<br>&nbsp;
+</p><p><b><font size="-1">Table 2. A Matrix of Times at which Each Control Signal
+Must Be Active in Order to</font></b>
+<br><b><font size="-1">Execute the Hard-wired Basic Computer's Instructions</font></b>
+</p><p><tt><font size="-1">Control Signal: IP&nbsp; LP&nbsp; EP&nbsp; LM&nbsp;
+R&nbsp; W&nbsp; LD&nbsp; ED&nbsp; LI&nbsp; EI&nbsp; LA&nbsp; EA&nbsp; A&nbsp;
+S&nbsp; EU&nbsp; LB</font></tt>
+<br><tt><font size="-1">Instruction:</font></tt>
+<br><tt><font size="-1">-----------------------------------------------------------------------------</font></tt>
+<br><tt><font size="-1">"Fetch"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+T2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; T0&nbsp; T0&nbsp; T1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+T2&nbsp; T2</font></tt>
+<br><tt><font size="-1">LDA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+T3&nbsp;
+ T4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+T5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+T3&nbsp; T5</font></tt>
+<br><tt><font size="-1">STA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+T3&nbsp;&nbsp;&nbsp;&nbsp;
+ T5 T4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+T3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; T4</font></tt>
+<br><tt><font size="-1">MBA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+T3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+ T3</font></tt>
+<br><tt><font size="-1">ADD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+T4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+ T3&nbsp;&nbsp;&nbsp; T4</font></tt>
+<br><tt><font size="-1">SUB&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+T4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+ T3 T4</font></tt>
+<br><tt><font size="-1">JMP&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+T3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+T3</font></tt>
+<br><tt><font size="-1">JN&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+T3*NF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+T3*NF</font></tt>
+<br>&nbsp;
+<br>&nbsp;
+<br>&nbsp;
+</p><p><b><font size="-1">Table 3. The Microprogrammed Basic Computer's Address
+ROM</font></b>
+</p><p><tt>Instruction&nbsp; Address-ROM Address&nbsp;&nbsp; Address-ROM Contents</tt>
+<br><tt>Mnemonic&nbsp;&nbsp;&nbsp;&nbsp; (Instruction Op-Code) (Control-ROM
+Micro-</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Routine
+ Start Address)</tt>
+<br>-------------------------------------------------------------------------------
+<br><tt>"Fetch"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+00</tt>
+<br><tt>LDA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+03</tt>
+<br><tt>STA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+06</tt>
+<br><tt>ADD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+09</tt>
+<br><tt>SUB&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0B</tt>
+<br><tt>MBA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0D</tt>
+<br><tt>JMP&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0E</tt>
+<br><tt>JN&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+7&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0F</tt>
+<br><tt>Available for&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+8-E&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+12-1E</tt>
+<br><tt>New Instructions</tt>
+<br><tt>HLT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+F&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+1F</tt>
+<br>&nbsp;
+<br>&nbsp;
+</p><p><b>Table 4. The Microprogram that Implements the Basic Computer's Instruction
+Set</b>
+</p><p><tt><font size="-1">Microroutine&nbsp; Address-ROM&nbsp; Micro-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Control Signals:&nbsp;&nbsp; CD&nbsp;&nbsp;&nbsp;&nbsp; MAP&nbsp;&nbsp;
+HLT&nbsp;&nbsp; Address of&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Comment</font></tt>
+<br><tt><font size="-1">Name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Address&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Instruction&nbsp; ILELRWLELELEASEL&nbsp;&nbsp;
+bit&nbsp;&nbsp;&nbsp; bit&nbsp;&nbsp; bit&nbsp;&nbsp; Next Micro-</font></tt>
+<br><tt><font size="-1">(Mnemonic)&nbsp;&nbsp; 
+(Op-code)&nbsp;&nbsp;&nbsp;&nbsp;
+Address&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; PPPM&nbsp; DDIIAA&nbsp; 
+UB&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Instruction</font></tt>
+<br><tt><font size="-1">-------------------------------------------------------------------------------------------------------------------------------</font></tt>
+<br><tt><font size="-1">"Fetch"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 00&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0011000000000000&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp;
+0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 01&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Next CR Address = 01</font></tt>
+<br><tt><font size="-1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+01&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+ 0000100000000000&nbsp;&nbsp;&nbsp;
+0&nbsp;&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp; 
+0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+02&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Next CR Address = 02</font></tt>
+<br><tt><font size="-1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+02&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+ 1000000110000000&nbsp;&nbsp;&nbsp;
+0&nbsp;&nbsp;&nbsp;&nbsp; 1&nbsp;&nbsp;&nbsp;&nbsp; 
+0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+xx&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Get CR Address from Address ROM</font></tt>
+</p><p><tt><font size="-1">LDA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 03&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0010000001000000&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp;
+0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 04&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Nexr CR Address = 04</font></tt>
+<br><tt><font size="-1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+04&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+ 0000100000000000&nbsp;&nbsp;&nbsp;
+0&nbsp;&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp; 
+0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+05&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Next CR Address = 05</font></tt>
+<br><tt><font size="-1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+05&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+ 0000000100100000&nbsp;&nbsp;&nbsp;
+0&nbsp;&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp; 
+0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+00&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Next CR Address = 00 (Fetch)</font></tt>
+</p><p><tt><font size="-1">STA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 06&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0010000001000000&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp;
+0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 07&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Next CR Address = 07</font></tt>
+<br><tt><font size="-1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+07&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+ 0000001000010000&nbsp;&nbsp;&nbsp;
+0&nbsp;&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp; 
+0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+08&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Next CR Address = 08</font></tt>
+<br><tt><font size="-1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+08&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+ 0000010000000000&nbsp;&nbsp;&nbsp;
+0&nbsp;&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp; 
+0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+00&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Next CR Address = 00 (Fetch)</font></tt>
+</p><p><tt><font size="-1">ADD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 09&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0000000000001000&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp;
+0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0A&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Next CR Address = 0A</font></tt>
+<br><tt><font size="-1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0A&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+ 0000000000100010&nbsp;&nbsp;&nbsp;
+0&nbsp;&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp; 
+0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+00&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Next CR Address = 00 (Fetch)</font></tt>
+</p><p><tt><font size="-1">SUB&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0B&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0000000000000100&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp;
+0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0C&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Next CR Address = 0C</font></tt>
+<br><tt><font size="-1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0C&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+ 0000000000100010&nbsp;&nbsp;&nbsp;
+0&nbsp;&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp; 
+0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+00&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Next CR Address = 00 (Fetch)</font></tt>
+</p><p><tt><font size="-1">MBA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0D&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0000000000010001&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp;
+0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 00&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Next CR Address is 00 (Fetch)</font></tt>
+</p><p><tt><font size="-1">JMP&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0E&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0100000001000000&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp;
+0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 00&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Change PC; next CR Address is 00 (Fetch)</font></tt>
+</p><p><tt><font size="-1">JN&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+7&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0F&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0000000000000000&nbsp;&nbsp;&nbsp; 1&nbsp;&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp;
+0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 11&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+NF=0: INC CRJA; NF=1: Next CR Address = 11</font></tt>
+<br><tt><font size="-1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+10&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+ 0000000000000000&nbsp;&nbsp;&nbsp;
+0&nbsp;&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp; 
+0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+00&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Next CR Address = 00 (Fetch)</font></tt>
+<br><tt><font size="-1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+11&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+ 0100000001000000&nbsp;&nbsp;&nbsp;
+0&nbsp;&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp; 
+0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+00&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Change PC; next CR Address is 00
+(Fetch)</font></tt>
+</p><p><tt><font size="-1">Available for&nbsp;&nbsp; 
+8-E&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+12-1E&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+New
+ microinstructions can be added here</font></tt>
+</p><p><tt><font size="-1">HLT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+F&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1F&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+0000000000000000&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp; 0&nbsp;&nbsp;&nbsp;&nbsp;
+1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; xx&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Stop Clock</font></tt>
+<br>&nbsp;
+
+
+</p></body></html>

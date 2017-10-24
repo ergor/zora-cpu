@@ -1,7 +1,7 @@
 
 lines {
-    #TMP_A_OE
-    #TMP_B_OE
+    #R0_OE
+    #TMP_OE
     #PC_OE
     #SP_OE
     #PC_LOAD_EN
@@ -19,10 +19,10 @@ lines {
     ALUOP_2
     
     // these are not directly used; they are fed into decoders. see defines
-    OE_ENCL_1
-    OE_ENCL_2
-    OE_ENCL_4
-    OE_ENCL_8
+    #OE_ENCL_1
+    #OE_ENCL_2
+    #OE_ENCL_4
+    #OE_ENCL_8
     #CLK_ENCL_1
     #CLK_ENCL_2
     #CLK_ENCL_4
@@ -31,71 +31,76 @@ lines {
 
 define {
     // BEGIN: encoded /OE lines
-    R0_OE {
-        // nothing; R0 (accumulator) is default OE entity
+    ALU_OE {
+        OE_ENCL_1
+        OE_ENCL_2
+        OE_ENCL_4
+        OE_ENCL_8
     }
     R1_OE {
-        OE_ENCL_1
+        OE_ENCL_2
+        OE_ENCL_4
+        OE_ENCL_8
     }
     R2_OE {
-        OE_ENCL_2
+        OE_ENCL_1
+        OE_ENCL_4
+        OE_ENCL_8
     }
     R3_OE {
-        OE_ENCL_1
-        OE_ENCL_2
+        OE_ENCL_4
+        OE_ENCL_8
     }
     R4_OE {
-        OE_ENCL_4
+        OE_ENCL_1
+        OE_ENCL_2
+        OE_ENCL_8
     }
     R5_OE {
-        OE_ENCL_1
-        OE_ENCL_4
+        OE_ENCL_2
+        OE_ENCL_8
     }
     R6_OE {
-        OE_ENCL_2
-        OE_ENCL_4
-    }
-    FLAGS_SEL {
         OE_ENCL_1
-        OE_ENCL_2
-        OE_ENCL_4
+        OE_ENCL_8
+    }
+    // 7
+    FLAGS_SEL {
+        OE_ENCL_8
     }
 
-    FLAGS_OE_OPBUS {
-        OE_ENCL_8
-    }
-    PC_H_OE {
-        OE_ENCL_1
-        OE_ENCL_8
-    }
-    PC_L_OE {
-        OE_ENCL_2
-        OE_ENCL_8
-    }
-    SP_ALUB_OE {
+    // 8
+    FLAGS_OE_DB {
         OE_ENCL_1
         OE_ENCL_2
-        OE_ENCL_8
-    }
-    ALU_OE {
         OE_ENCL_4
-        OE_ENCL_8
     }
+    // 9
+    PC_H_OE {
+        OE_ENCL_2
+        OE_ENCL_4
+    }
+    // 10
+    PC_L_OE {
+        OE_ENCL_1
+        OE_ENCL_4
+    }
+    // 11
+    SP_DB_OE {
+        OE_ENCL_4
+    }
+    // 12
     CLI {
         OE_ENCL_1
-        OE_ENCL_4
-        OE_ENCL_8
+        OE_ENCL_2
     }
+    // 13
     SEI {
         OE_ENCL_2
-        OE_ENCL_4
-        OE_ENCL_8
     }
+    // 14
     INTA {
         OE_ENCL_1
-        OE_ENCL_2
-        OE_ENCL_4
-        OE_ENCL_8
     }
     // END: encoded /OE lines
     // BEGIN: encoded CLK lines
@@ -156,14 +161,11 @@ define {
         CLK_ENCL_1
         CLK_ENCL_2
     }
-    TMP_A_CLK {
+    TMP_CLK {
         CLK_ENCL_2
     }
-    TMP_B_CLK {
-        CLK_ENCL_1
-    }
     ALR_CLK {
-        // nothing: default input destination
+        CLK_ENCL_1
     }
     // END: encoded CLK lines
     // BEGIN: ALU OPs
@@ -198,24 +200,35 @@ define {
     }
 
     PASS_A {
-        TMP_A_OE
+        R0_OE
         ALU_OE
         ALUOP_XOR
     }
-    PASS_B {
-        TMP_B_OE
+    PASS_TMP {
+        TMP_OE
         ALU_OE
-        ALUOP_AND
+        ALUOP_XOR
     }
-    ADD_A_B {
-        TMP_A_OE
-        TMP_B_OE
+    ADD_A_TMP {
+        R0_OE
+        TMP_OE
         ALUOP_ADD
     }
 
+    // stack pushes
     PUSH_DB {
         SP_OE
         WE
+    }
+    PUSH_PC_H_POSTDEC {
+        PC_H_OE
+        PUSH_DB
+        SP_POSTDEC
+    }
+    PUSH_PC_L_POSTDEC {
+        PC_L_OE
+        PUSH_DB
+        SP_POSTDEC
     }
 }
 
@@ -280,8 +293,8 @@ instructions {
             AHR_CLK
         }
         T2 {
-            // read to ALR (default input)
             PCOE_POSTINC_RE
+            ALR_CLK
         }
         T3 {
             // read to accumulator from IO
@@ -296,32 +309,13 @@ instructions {
     }
 
     OUT m {
-        T0 {
-            FETCH_T0
-        }
-        T1 {
-            // r0 is default OE
-            TMP_A_CLK
-        }
-        T2 {
-            // load 0 (databus has pull downs)
-            AHR_CLK
-        }
+        * IN m {}
         T3 {
-            // ALR is default input
-            PCOE_POSTINC_RE
-        }
-        T4 {
-            // hack to prevent new ALR clock cycle
-            TMP_B_CLK
             // write accumulator to IO
             AR_OE
             PASS_A
             IO_M
             WE
-        }
-        T5 {
-            RESET
         }
     }
 
@@ -419,37 +413,23 @@ instructions {
             FETCH_T0
         }
         T1 {
-            PC_L_OE
-            TMP_A_CLK
+            PUSH_PC_L_POSTDEC
         }
         T2 {
-            PASS_A
-            PUSH_DB
-            SP_POSTDEC
+            PUSH_PC_H_POSTDEC
         }
         T3 {
-            PC_H_OE
-            TMP_A_CLK
-        }
-        T4 {
-            PASS_A
-            PUSH_DB
-            SP_POSTDEC
-        }
-        T5 {
             // put to DB from RAM
-            PC_OE
-            PC_CNT_EN
-            RE
+            PCOE_POSTINC_RE
             // load high address
             AHR_CLK
         }
-        T6 {
+        T4 {
             PC_OE
             RE
             PC_LOAD_EN
         }
-        T7 {
+        T5 {
             RESET
         }
     }
@@ -501,100 +481,104 @@ instructions {
         
     }
 
+    // MOV r0, rx
     0x15 MOV r0, r1 {
         T0 {
             FETCH_T0
         }
         T1 {
-            R0_OE
-            TMP_A_CLK
-        }
-        T2 {
             PASS_A
             R1_CLK_EN
         }
-        T3 {
+        T2 {
             RESET
         }
     }
     MOV r0, r2 {
         * MOV r0, r1 {}
-        T2 {
+        T1 {
             PASS_A
             R2_CLK_EN
         }
     }
     MOV r0, r3 {
         * MOV r0, r1 {}
-        T2 {
+        T1 {
             PASS_A
             R3_CLK_EN
         }
     }
     MOV r0, r4 {
         * MOV r0, r1 {}
-        T2 {
+        T1 {
             PASS_A
             R4_CLK_EN
         }
     }
     MOV r0, r5 {
         * MOV r0, r1 {}
-        T2 {
+        T1 {
             PASS_A
             R5_CLK_EN
         }
     }
     MOV r0, r6 {
         * MOV r0, r1 {}
-        T2 {
+        T1 {
             PASS_A
             R6_CLK_EN
         }
     }
+
+    // MOV r1, rx
     MOV r1, r0 {
-        * MOV r0, r1 {}
+        T0 {
+            FETCH_T0
+        }
         T1 {
             R1_OE
-            TMP_A_CLK
+            TMP_CLK
         }
         T2 {
-            PASS_A
+            PASS_TMP
             R0_CLK_EN
+        }
+        T3 {
+            RESET
         }
     }
     MOV r1, r2 {
         * MOV r1, r0 {}
         T2 {
-            PASS_A
+            PASS_TMP
             R2_CLK_EN
         }
     }
     MOV r1, r3 {
         * MOV r1, r0 {}
         T2 {
-            PASS_A
+            PASS_TMP
             R3_CLK_EN
         }
     }
     MOV r1, r4 {
         * MOV r1, r0 {}
         T2 {
-            PASS_A
+            PASS_TMP
             R4_CLK_EN
         }
     }
     MOV r1, r5 {
         * MOV r1, r0 {}
         T2 {
-            PASS_A
+            PASS_TMP
             R5_CLK_EN
         }
     }
     MOV r1, r6 {
         * MOV r1, r0 {}
         T2 {
-            PASS_A
+            PASS_TMP
             R6_CLK_EN
         }
     }
@@ -671,23 +655,19 @@ instructions {
             FETCH_T0
         }
         T1 {
-            R0_OE
-            TMP_A_CLK
-        }
-        T2 {
             PCOE_POSTINC_RE
             AHR_CLK
         }
-        T3 {
+        T2 {
             PCOE_POSTINC_RE
             ALR_CLK
         }
-        T4 {
+        T3 {
             AR_OE
             PASS_A
             WE
         }
-        T5 {
+        T4 {
             RESET
         }
     }
@@ -702,40 +682,36 @@ instructions {
             FETCH_T0
         }
         T1 {
-            R0_OE
-            TMP_A_CLK
+            PASS_A
+            TMP_CLK
         }
         T2 {
-            R0_OE
-            TMP_B_CLK
-        }
-        T3 {
-            ADD_A_B
+            ADD_A_TMP
             FLAGS_CLK_EN
         }
-        T4 {
-            ADD_A_B
+        T3 {
+            ADD_A_TMP
             ALU_OE
             R0_CLK_EN
         }
-        T5 {
+        T4 {
             RESET
         }
     }
 
     ADD r1 {
         * ADD r0 {}
-        T2 {
+        T1 {
             R1_OE
-            TMP_B_CLK
+            TMP_CLK
         }
     }
 
     ADD r2 {
         * ADD r0 {}
-        T2 {
+        T1 {
             R2_OE
-            TMP_B_CLK
+            TMP_CLK
         }
     }
 
@@ -807,34 +783,23 @@ instructions {
     // DO NOT USE DIRECTLY
     0xFF INT {
         T0 {
-            PC_L_OE
-            TMP_A_CLK
+            PUSH_PC_L_POSTDEC
         }
         T1 {
-            PC_H_OE
-            TMP_B_CLK
+            PUSH_PC_H_POSTDEC
         }
         T2 {
-            PASS_A
-            PUSH_DB
-            SP_POSTDEC
-        }
-        T3 {
-            PASS_B
-            PUSH_DB
-            SP_POSTDEC
-        }
-        T4 {
             // databus has pull down, so this will load 0 to AHR
             AHR_CLK
             // disable interrupts
             CLI
         }
-        T5 {
+        T3 {
+            // INTA signals to device to output vector to databus
             INTA
             PC_LOAD_EN
         }
-        T6 {
+        T4 {
             RESET
         }
     }
