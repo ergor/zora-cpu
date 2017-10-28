@@ -1,5 +1,8 @@
 
 lines {
+    // AR OE
+    // #AR OE 
+
     #R0_OE
     #TMP_OE
     #PC_OE
@@ -9,8 +12,8 @@ lines {
     WE
     RE
     
-    #IO_M
     #COND_uJMP
+    #IO_M
     #RESET
     #HALT
     Cin_EN
@@ -141,29 +144,36 @@ define {
         CLK_ENCL_8
     }
 
+    // 8
     SP_POSTDEC {
         CLK_ENCL_1
         CLK_ENCL_2
         CLK_ENCL_4
     }
+    // 9
     AHR_CLK {
         CLK_ENCL_2
         CLK_ENCL_4
     }
+    // 10
     SP_POSTINC {
         CLK_ENCL_1
         CLK_ENCL_4
     }
+    // 11
     SP_LOAD {
         CLK_ENCL_4
     }
+    // 12
     IR_CLK_EN {
         CLK_ENCL_1
         CLK_ENCL_2
     }
+    // 13
     TMP_CLK {
         CLK_ENCL_2
     }
+    // 14
     ALR_CLK {
         CLK_ENCL_1
     }
@@ -777,6 +787,11 @@ instructions {
 
     CMP imm {
 
+    }
+
+    NOT rx {
+        // disable acc output; enable tmp out;
+        // ALU sub => 0 + (ones comp) B = NOT B
     }
 
     // reads interrupt vector from databus and jumps

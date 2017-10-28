@@ -1,0 +1,23 @@
+0 - IRQ
+1 - data
+2 - counters
+3 - t state
+*****************
+0 - #R0_OE
+1 - #TMP_OE
+2 - #PC_OE
+3 - #SP_OE
+4 - #PC_LOAD_EN
+5 - PC_CNT_EN
+6 - WE
+7 - RE
+    
+    #COND_uJMP
+8 - #IO_M
+9 - #RESET
+10- #HALT
+    Cin_EN
+    ALUOP_0
+    ALUOP_1
+    ALUOP_2
+*****************
