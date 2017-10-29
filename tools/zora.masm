@@ -249,6 +249,8 @@ instructions {
     // to select flag bit, ie. zero flag, carry flag, etc.
     // bit4 (counting from bit0) is wired to invert the condition bit
 
+
+    //// BRANCHING AND PROGRAM FLOW ////
     NOP {
         T0 {
             FETCH_T0
@@ -491,6 +493,8 @@ instructions {
         
     }
 
+    //// DATA MOVEMENT ////
+
     // MOV r0, rx
     0x15 MOV r0, r1 {
         T0 {
@@ -651,12 +655,48 @@ instructions {
 
     // load value stored at m to register rx
     0x40 LD m, r0 {
-
+        T0 {
+            FETCH_T0
+        }
+        T1 {
+            PCOE_POSTINC_RE
+            AHR_CLK
+        }
+        T2 {
+            PCOE_POSTINC_RE
+            ALR_CLK
+        }
+        T3 {
+            AR_OE
+            RE
+            R0_CLK_EN
+        }
+        T4 {
+            RESET
+        }
     }
 
-    // load accumulator (r0) from address held in rx
-    0x47 LDA r1 {
-
+    // load accumulator (r0) from address held in pair rHL
+    0x47 LDA r12 {
+        T0 {
+            FETCH_T0
+        }
+        T1 {
+            R1_OE
+            AHR_CLK
+        }
+        T2 {
+            R2_OE
+            ALR_CLK
+        }
+        T3 {
+            AR_OE
+            RE
+            R0_CLK_EN
+        }
+        T4 {
+            RESET
+        }
     }
 
     // store value in rx to address m
@@ -682,10 +722,39 @@ instructions {
         }
     }
 
-    // store accumulator (r0) in address held in rx
-    0x54 STA r1 {
+    // store accumulator (r0) in address held in pair rHL
+    0x54 STA r12 {
          
     }
+    STA r34 {
+
+    }
+    STA r56 {
+
+    }
+
+    // read from IO at address m to rx
+    0x57 IN m, r0 {
+
+    }
+
+    // read from IO address held in rx to r0
+    0x5E INA r1 {
+
+    }
+
+    // write from rx to IO at address m
+    0x64 OUT r0, m {
+
+    }
+
+    // write from r0 to IO address held in rx
+    0x6B OUTA r1 {
+
+    }
+
+
+    //// ARITHMETIC AND LOGIC ////
 
     0x80 ADD r0 {
         T0 {
@@ -708,7 +777,6 @@ instructions {
             RESET
         }
     }
-
     ADD r1 {
         * ADD r0 {}
         T1 {
@@ -716,7 +784,6 @@ instructions {
             TMP_CLK
         }
     }
-
     ADD r2 {
         * ADD r0 {}
         T1 {
@@ -729,11 +796,11 @@ instructions {
 
     }
 
-    0x8E SUB.A r0 {
+    0x8E SUB r1 {
 
     }
 
-    0x94 SBB.A r0 {
+    0x94 SBB r1 {
 
     }
 
@@ -769,11 +836,11 @@ instructions {
 
     }
 
-    SUB.A imm {
+    SUB imm {
 
     }
 
-    SBB.A imm {
+    SBB imm {
 
     }
 
