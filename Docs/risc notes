@@ -24,3 +24,69 @@ Inc r1
 
 **Aug 25**
 Multiphase clock (shiftreg?ringcounter?) to clock through data sequentially, using micro code merely to decode source/destination registers encoded in the instruction. 
+
+
+**03.05.18**
+Indirect control lines
+(does not use opcode bits):
+
+special:
+
+DB OEs (encoded):
+00  #PC H OE (DBUS)
+01  #PC L OE (DBUS)
+02  #SP H OE (DBUS)
+03  #SP L OE (DBUS)
+04  #F OE    (DBUS)
+05  #ALU OE  (DBUS)
+06
+07
+
+clocked (encoded):
+00   PC CLK
+01  #SP P
+02  #SP U
+03  #SP D
+04   AR CLK
+05   IR CLK
+06   F  CLK
+07   TMP CLK
+
+static (free):
+00  #PC C/#P
+01   F ALU/#DB
+02  #IO/M
+03   WE
+04   RE
+05  #AR A OE (ABUS)
+06  #SP A OE (ABUS)
+07  #PC A OE (ABUS)
+--
+10   OE
+10   IE
+
+
+Direct control lines
+(uses bits in opcode):
+
+general purpose:
+
+**12.05.18**
+TMP and r0
+option1:
+Since ALU ops are all the same
+essentially, TMP and r0 CLKs
+can be clocked purely on timing,
+not needing dedicated control
+lines.
+
+option2:
+Instruction bits for destination
+is also used to select ALU op.
+When doing ALU ops, destination
+is implicitly r0. Thus, bypass
+destination bits for ALU ops so
+that r0 is selected as dest.
+
+Go for option 2
+
