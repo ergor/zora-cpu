@@ -5,3 +5,4 @@
 /tools/microassembler/dist/
 /tools/microassembler/nbdist/
 /tools/microassembler/.nb-gradle/
+micro_code/.vscode
