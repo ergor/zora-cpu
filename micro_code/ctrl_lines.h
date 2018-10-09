@@ -35,7 +35,8 @@
 
 #define _TMP_CK      25UL
 
-#define _SH_R        26UL
+#define _BRA_RST     26UL
+
 #define _SH_EN       27UL
 
 #define _FLAG_CK     28UL
@@ -55,7 +56,7 @@
 #define _FLOW_HLT    38UL
 #define _FLOW_BRA    39UL
 
-#define ACTV_HIS    _PC_CK, _AR_CK, _DECD_IE, _DECD_OE, _IR_CK, _TMP_CK, _SH_R,\
+#define ACTV_HIS    _PC_CK, _AR_CK, _DECD_IE, _DECD_OE, _IR_CK, _TMP_CK, \
                     _FLAG_CK, _IO_MEM_D_CK, _IO_MEM_RE, _IO_MEM_WE, \
                     _NEXT_0, _NEXT_1, _NEXT_2, _NEXT_3, _NEXT_4, _NEXT_5, _NEXT_6, _NEXT_7
 
